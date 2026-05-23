@@ -5,12 +5,14 @@ interface LastScreeningCardProps {
   date?: string;
   status?: string;
   detailHref?: string;
+  hasData?: boolean;
 }
 
 export default function LastScreeningCard({
-  date = '12 April 2025',
-  status = 'Lengkap & Stabil',
+  date = 'Belum ada data',
+  status = 'Lakukan skrining pertama untuk melihat ringkasan terbaru.',
   detailHref = '/health-data',
+  hasData = false,
 }: LastScreeningCardProps) {
   return (
     <div
@@ -41,13 +43,19 @@ export default function LastScreeningCard({
       {/* Link */}
       <div className="pt-[7px] border-t border-[#BFCABA]">
         <div className="pt-4">
-          <Link
-            href={detailHref}
-            className="flex items-center gap-2 text-[16px] font-normal text-[#0D631B] leading-[24px] hover:underline"
-          >
-            Lihat Detail Laporan
-            <Image src="/icons/icon-arrow-right.svg" alt="Arrow" width={10} height={10} />
-          </Link>
+          {hasData ? (
+            <Link
+              href={detailHref}
+              className="flex items-center gap-2 text-[16px] font-normal text-[#0D631B] leading-[24px] hover:underline"
+            >
+              Lihat Detail Laporan
+              <Image src="/icons/icon-arrow-right.svg" alt="Arrow" width={10} height={10} />
+            </Link>
+          ) : (
+            <p className="text-[14px] font-medium leading-[21px] text-[#5E6D60]">
+              Data detail akan muncul setelah skrining tersimpan.
+            </p>
+          )}
         </div>
       </div>
     </div>

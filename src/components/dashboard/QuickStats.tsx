@@ -20,6 +20,7 @@ interface QuickStatsProps {
   } | null;
   bmi?: number | null;
   totalScreenings?: number;
+  hasData?: boolean;
 }
 
 export function StatCard({
@@ -82,18 +83,19 @@ export default function QuickStats({
   bloodPressure = null,
   bmi = null,
   totalScreenings,
+  hasData = false,
 }: QuickStatsProps) {
   const bpValue = bloodPressure
     ? `${bloodPressure.systolic}/${bloodPressure.diastolic}`
-    : '120/80';
+    : '—';
   const bpBadge = bloodPressure
     ? getBPCategory(bloodPressure.systolic, bloodPressure.diastolic)
-    : { label: 'Normal', color: '#0D631B' };
+    : { label: hasData ? 'Tidak tersedia' : 'Belum ada data', color: '#40493D' };
 
-  const bmiValue = bmi != null ? bmi.toFixed(1) : '22.4';
+  const bmiValue = bmi != null ? bmi.toFixed(1) : '—';
   const bmiBadge = bmi != null
     ? getBMICategory(bmi)
-    : { label: 'Ideal', color: '#0D631B' };
+    : { label: hasData ? 'Tidak tersedia' : 'Belum ada data', color: '#40493D' };
 
   return (
     <div className="flex flex-col gap-6">
@@ -123,9 +125,9 @@ export default function QuickStats({
         label="Total Skrining"
         value={formatNumber(totalScreenings ?? 0)}
         unit="Data"
-        badge="Tersimpan"
-        badgeBg="rgba(13, 99, 27, 0.1)"
-        badgeText="#0D631B"
+        badge={hasData ? 'Tersimpan' : 'Kosong'}
+        badgeBg={hasData ? 'rgba(13, 99, 27, 0.1)' : 'rgba(64,73,61,0.08)'}
+        badgeText={hasData ? '#0D631B' : '#40493D'}
       />
     </div>
   );

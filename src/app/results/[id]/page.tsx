@@ -46,15 +46,18 @@ function RiskBar({
 function TrendSparkline({
   scores,
   labels,
+  isLoading,
 }: {
   scores: number[];
   labels: string[];
+  isLoading?: boolean;
 }) {
-  const history = scores.length > 0 ? scores : [58, 61, 64, 68, 72, 76, 80];
+  const history = scores;
+  const hasData = history.length > 0;
   const maxH = 82;
   const highestVal = Math.max(...history, 1);
-  const first = history[0];
-  const last = history[history.length - 1];
+  const first = history[0] ?? 0;
+  const last = history[history.length - 1] ?? 0;
   const delta = first === 0 ? 0 : Math.round(((last - first) / first) * 100);
 
   return (
@@ -74,23 +77,33 @@ function TrendSparkline({
         </span>
       </div>
 
-      <div className="flex items-end gap-1 flex-1 px-2 pb-1" style={{ height: maxH + 12 }}>
-        {history.map((val, index) => (
-          <div
-            key={`trend-${index}-${labels[index] ?? 'item'}-${val}`}
-            className="flex-1 rounded-t-sm transition-all duration-500"
-            style={{
-              height: `${(val / highestVal) * maxH}px`,
-              background: 'rgba(13,99,27,0.2)',
-            }}
-            title={`${labels[index] ?? `Data ${index + 1}`}: ${val}`}
-          />
-        ))}
-      </div>
+      {isLoading ? (
+        <div className="flex flex-1 items-center justify-center text-[14px] font-medium text-[#40493D]" style={{ height: maxH + 12 }}>
+          Memuat tren skor...
+        </div>
+      ) : !hasData ? (
+        <div className="flex flex-1 items-center justify-center px-4 text-center text-[14px] font-medium text-[#40493D]" style={{ height: maxH + 12 }}>
+          Belum ada cukup riwayat skrining untuk menampilkan tren skor.
+        </div>
+      ) : (
+        <div className="flex items-end gap-1 flex-1 px-2 pb-1" style={{ height: maxH + 12 }}>
+          {history.map((val, index) => (
+            <div
+              key={`trend-${index}-${labels[index] ?? 'item'}-${val}`}
+              className="flex-1 rounded-t-sm transition-all duration-500"
+              style={{
+                height: `${(val / highestVal) * maxH}px`,
+                background: 'rgba(13,99,27,0.2)',
+              }}
+              title={`${labels[index] ?? `Data ${index + 1}`}: ${val}`}
+            />
+          ))}
+        </div>
+      )}
 
       <div className="flex items-center justify-center pt-1 border-t border-[#EBEFE5]">
         <span className="text-[12px] font-medium leading-[14.4px] text-[#40493D]">
-          {scores.length > 0 ? 'Riwayat skor kesehatan tersimpan' : 'Fallback tren sementara'}
+          {isLoading ? 'Mengambil data dari API' : hasData ? 'Riwayat skor kesehatan tersimpan' : 'Belum ada data tren'}
         </span>
       </div>
     </div>
@@ -240,7 +253,7 @@ export default function ResultsPage({
 }) {
   const { id } = use(params);
   const { data: screening, loading, error } = useScreeningById(id);
-  const { data: allScreenings } = useScreeningList();
+  const { data: allScreenings, loading: listLoading } = useScreeningList();
   const [inputs] = useState<LastScreeningInputs | null>(() =>
     getLastScreeningInputs<LastScreeningInputs>(),
   );
@@ -360,7 +373,7 @@ export default function ResultsPage({
               </div>
             </div>
 
-            <TrendSparkline scores={trendScores} labels={trendLabels} />
+            <TrendSparkline scores={trendScores} labels={trendLabels} isLoading={listLoading} />
           </div>
         </div>
       </div>

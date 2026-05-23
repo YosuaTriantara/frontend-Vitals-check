@@ -8,7 +8,6 @@ import HealthTrendChart from '@/components/dashboard/HealthTrendChart';
 import LastScreeningCard from '@/components/dashboard/LastScreeningCard';
 import QuickStats from '@/components/dashboard/QuickStats';
 import { useScreeningList } from '@/hooks/useScreening';
-import { useTrends } from '@/hooks/useTrends';
 import {
   getBMICategory,
   getBPCategory,
@@ -100,13 +99,19 @@ function HealthScoreCard({
   score,
   delta,
   riskLabel,
+  hasData,
+  isLoading,
 }: {
-  score: number;
+  score: number | null;
   delta: number | null;
   riskLabel: string;
+  hasData: boolean;
+  isLoading: boolean;
 }) {
   const trendText =
-    delta == null
+    !hasData
+      ? 'Belum ada data skrining yang bisa dianalisis'
+      : delta == null
       ? 'Belum cukup data untuk membandingkan tren'
       : delta > 0
         ? `Meningkat ${delta}% dari skrining sebelumnya`
@@ -140,7 +145,7 @@ function HealthScoreCard({
             className="text-[48px] font-extrabold leading-[57.6px] text-[#0D631B]"
             style={{ letterSpacing: '-2%' }}
           >
-            {score}
+            {isLoading ? '...' : score ?? '—'}
           </span>
           <span className="text-[18px] font-normal text-[#40493D] leading-[28.8px]">
             /100
@@ -216,12 +221,12 @@ export default function DashboardPage() {
   const ordered = getLatestScreening(screenings);
   const latest = ordered[0] ?? null;
   const previous = ordered[1] ?? null;
-  const { riskScoreTrend } = useTrends(ordered);
 
-  const healthScore = latest ? healthScoreFromRisk(latest.riskScore) : 84;
+  const hasData = ordered.length > 0;
+  const healthScore = latest ? healthScoreFromRisk(latest.riskScore) : null;
   const previousScore = previous ? healthScoreFromRisk(previous.riskScore) : null;
   const scoreDelta =
-    previousScore == null ? null : healthScore - previousScore;
+    previousScore == null || healthScore == null ? null : healthScore - previousScore;
 
   const lastStatus = latest
     ? [
@@ -235,13 +240,9 @@ export default function DashboardPage() {
       ]
         .filter(Boolean)
         .join(' • ')
-    : 'Lengkap & Stabil';
+    : 'Belum ada hasil skrining tersimpan';
 
-  const weeklyData =
-    ordered.length > 0 ? buildWeeklyData(ordered) : riskScoreTrend.slice(-7).map((point, index) => ({
-      label: `S${index + 1}`,
-      value: point.value,
-    }));
+  const weeklyData = ordered.length > 0 ? buildWeeklyData(ordered) : [];
   const monthlyData = ordered.length > 0 ? buildMonthlyData(ordered) : [];
   const recommendations = buildRecommendations(latest);
 
@@ -249,7 +250,7 @@ export default function DashboardPage() {
     <div className="px-9 py-8 flex flex-col gap-6">
       {error && (
         <Alert variant="warning">
-          Gagal memuat data dashboard dari API. Data fallback sedang ditampilkan.
+          Gagal memuat data dashboard dari API. Tidak ada data yang ditampilkan sampai API tersedia.
         </Alert>
       )}
 
@@ -287,18 +288,22 @@ export default function DashboardPage() {
           score={healthScore}
           delta={scoreDelta}
           riskLabel={latest ? formatRiskCategory(latest.riskCategory) : 'Belum tersedia'}
+          hasData={hasData}
+          isLoading={loading}
         />
         <LastScreeningCard
           date={latest ? getDisplayDate(latest.createdAt) : 'Belum ada data'}
           status={lastStatus}
           detailHref={latest?.id ? `/results/${latest.id}` : '/health-data'}
+          hasData={hasData}
         />
         <RecommendationsCard recommendations={recommendations} />
 
         <div className="col-span-2">
           <HealthTrendChart
-            weeklyData={weeklyData.length > 0 ? weeklyData : undefined}
-            monthlyData={monthlyData.length > 0 ? monthlyData : undefined}
+            weeklyData={weeklyData}
+            monthlyData={monthlyData}
+            isLoading={loading}
           />
         </div>
 
@@ -313,6 +318,7 @@ export default function DashboardPage() {
           }
           bmi={latest?.bmi ?? null}
           totalScreenings={ordered.length}
+          hasData={hasData}
         />
       </section>
     </div>
