@@ -1,21 +1,26 @@
-import type { Metadata } from 'next';
-import { Manrope, Space_Grotesk } from 'next/font/google';
-import { AuthProvider } from '@/context/AuthContext';
-import './globals.css';
+import type { Metadata, Viewport } from "next";
+import { Manrope, Space_Grotesk } from "next/font/google";
+import { AuthProvider } from "@/context/AuthContext";
+import "./globals.css";
 
 const bodyFont = Manrope({
-  subsets: ['latin'],
-  variable: '--font-body',
+  subsets: ["latin"],
+  variable: "--font-body",
 });
 
 const displayFont = Space_Grotesk({
-  subsets: ['latin'],
-  variable: '--font-display',
+  subsets: ["latin"],
+  variable: "--font-display",
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
 export const metadata: Metadata = {
-  title: 'VitalsCheck',
-  description: 'Deteksi dini risiko penyakit tidak menular',
+  title: "VitalsCheck",
+  description: "Deteksi dini risiko penyakit tidak menular",
 };
 
 export default function RootLayout({
@@ -26,9 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${bodyFont.variable} ${displayFont.variable}`}>
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );
