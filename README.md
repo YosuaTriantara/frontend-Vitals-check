@@ -353,4 +353,4 @@ Lihat [src/STRUCTURE.md](./src/STRUCTURE.md) untuk documentasi detail atau buat 
 ---
 
 **Last Updated**: May 21, 2026  
-**Maintained by**: CC26-PSU319 Team
+**Maintained by**: CC26-PSU319 TeamV
