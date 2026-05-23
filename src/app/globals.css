@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@theme {
+    --font-body: var(--font-body);
+    --font-display: var(--font-display);
+
+    --color-primary: #0f6d2b;
+    --color-primary-container: #318741;
+    --color-tertiary: #bc1120;
+    --color-surface: #f6fbf1;
+    --color-on-surface: #181d17;
+    --color-on-surface-muted: #40493d;
+    --color-on-surface-subtle: #466647;
+    --color-border-card: rgba(13, 99, 27, 0.05);
+    --color-border-light: #bfcaba;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-body), sans-serif;
+    background-color: #ffffff;
+    color: #181d17;
+}
+
+/* ── Range slider reset & theme ───────────────────────────── */
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 2px solid #318741;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+    transition: border-color 0.15s;
+}
+input[type="range"]:hover::-webkit-slider-thumb {
+    border-color: #0f6d2b;
+}
+input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 2px solid #318741;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+}
+
+/* ── Number input – hide native spinners ──────────────────── */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type="number"] {
+    -moz-appearance: textfield;
+}
