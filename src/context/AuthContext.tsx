@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState } from 'react';
 import { User, LoginRequest, RegisterRequest } from '@/types/user';
-import { setToken, setUser, clearAuth, getUser, getToken, setOnboardingStatus } from '@/utils/storage';
+import { setToken, setUser, clearAuth, getUser, getToken, setOnboardingStatus, setTokenCookie, clearTokenCookie } from '@/utils/storage';
 import apiClient from '@/lib/api';
 
 interface AuthContextType {
@@ -27,6 +27,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const response = await apiClient.post('/auth/login', data);
     const { token, user } = response.data.data;
     setToken(token);
+    setTokenCookie(token);
     setUser(user);
     setOnboardingStatus(user.isOnboarded);
     setUserState(user);
@@ -36,6 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const response = await apiClient.post('/auth/register', data);
     const { token, user } = response.data.data;
     setToken(token);
+    setTokenCookie(token);
     setUser(user);
     setOnboardingStatus(user.isOnboarded);
     setUserState(user);
@@ -43,6 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   function logout() {
     clearAuth();
+    clearTokenCookie(); 
     setUserState(null);
   }
 

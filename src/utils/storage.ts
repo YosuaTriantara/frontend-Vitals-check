@@ -44,6 +44,14 @@ export function setLastScreeningInputs(inputs: object): void {
   localStorage.setItem("lastScreeningInputs", JSON.stringify(inputs));
 }
 
+export function setTokenCookie(token: string) {
+  document.cookie = `token=${token}; path=/; max-age=${7 * 24 * 60 * 60}`;
+}
+
+export function clearTokenCookie() {
+  document.cookie = 'token=; path=/; max-age=0';
+}
+
 export function getLastScreeningInputs<
   T = Record<string, unknown>,
 >(): T | null {
