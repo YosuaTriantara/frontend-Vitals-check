@@ -1,6 +1,3 @@
-// Plain TypeScript validation schemas (no Zod required).
-// If Zod is added later: npm install zod, then replace with z.object({...})
-
 export interface ScreeningSchema {
   age: number;
   gender: 'male' | 'female';

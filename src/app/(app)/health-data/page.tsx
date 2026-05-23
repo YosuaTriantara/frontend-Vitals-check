@@ -2,10 +2,15 @@
 
 import Link from 'next/link';
 import { useHealthData } from '@/hooks/useHealthData';
-import { formatDate, formatRiskCategory, formatRiskScore } from '@/utils/formatters';
+import {
+  formatDate,
+  formatRiskCategory,
+  formatRiskScore,
+} from '@/utils/formatters';
 import { RISK_COLORS } from '@/lib/constants';
 import Spinner from '@/components/ui/Spinner';
 import Alert from '@/components/ui/Alert';
+import { getBPCategory, getGlucoseStatus } from '@/utils/calculations';
 
 export default function HealthDataPage() {
   const { screenings, isLoading, error } = useHealthData();
@@ -20,9 +25,8 @@ export default function HealthDataPage() {
 
   return (
     <div className="px-9 py-8 flex flex-col gap-6">
-      {/* Header */}
       <section className="py-5">
-        <div className="max-w-[576px]">
+        <div className="max-w-[720px]">
           <h1
             className="text-[32px] font-bold leading-[41.6px] text-[#0F6D2B]"
             style={{ letterSpacing: '-0.32px' }}
@@ -30,20 +34,22 @@ export default function HealthDataPage() {
             Data Kesehatan
           </h1>
           <p className="mt-3 text-[18px] font-normal leading-[28.8px] text-[#40493D]">
-            Riwayat seluruh skrining kesehatan Anda.
+            Riwayat singkat seluruh skrining Anda. Klik satu entri untuk membuka
+            analisis lengkap dan rekomendasi detailnya.
           </p>
         </div>
       </section>
 
       {error && <Alert variant="error">{error}</Alert>}
 
-      {/* Screening list */}
       {screenings.length === 0 ? (
         <div
           className="bg-[#F6FBF1] rounded-[20px] p-16 flex flex-col items-center gap-4"
           style={{ border: '1px solid #DCE8DC' }}
         >
-          <p className="text-[18px] font-medium text-[#40493D]">Belum ada data skrining.</p>
+          <p className="text-[18px] font-medium text-[#40493D]">
+            Belum ada data skrining.
+          </p>
           <Link
             href="/screening"
             className="px-6 py-3 bg-[#318741] text-white rounded-[12px] text-[14px] font-semibold hover:bg-[#0F6D2B] transition-colors"
@@ -53,29 +59,79 @@ export default function HealthDataPage() {
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          {screenings.map((s) => {
-            const riskColor = RISK_COLORS[s.riskCategory];
+          {screenings.map((screening) => {
+            const riskColor = RISK_COLORS[screening.riskCategory];
+            const bpStatus =
+              screening.systolicBp != null && screening.diastolicBp != null
+                ? getBPCategory(screening.systolicBp, screening.diastolicBp).label
+                : null;
+            const glucoseStatus =
+              screening.bloodGlucose != null
+                ? getGlucoseStatus(screening.bloodGlucose).label
+                : null;
+
             return (
               <Link
-                key={s.id}
-                href={`/health-data/${s.id}`}
-                className="bg-white rounded-[20px] px-6 py-5 flex items-center justify-between hover:shadow-md transition-shadow"
-                style={{ border: '1px solid rgba(13,99,27,0.05)', boxShadow: '0px 1px 2px rgba(0,0,0,0.05)' }}
+                key={screening.id}
+                href={`/results/${screening.id}`}
+                className="bg-white rounded-[20px] px-6 py-5 hover:shadow-md transition-shadow"
+                style={{
+                  border: '1px solid rgba(13,99,27,0.05)',
+                  boxShadow: '0px 1px 2px rgba(0,0,0,0.05)',
+                }}
               >
-                <div className="flex flex-col gap-1">
-                  <p className="text-[16px] font-semibold text-[#181D17]">
-                    Skrining — {s.createdAt ? formatDate(s.createdAt) : '—'}
-                  </p>
-                  <p className="text-[14px] text-[#40493D]">
-                    Skor Kesehatan: <strong>{formatRiskScore(s.riskScore)}/100</strong>
-                    {s.bmi ? ` · BMI ${s.bmi.toFixed(1)}` : ''}
-                  </p>
-                </div>
-                <div
-                  className="px-3 py-1 rounded-full text-[12px] font-semibold"
-                  style={{ background: riskColor.bg, color: riskColor.text }}
-                >
-                  Risiko {formatRiskCategory(s.riskCategory)}
+                <div className="flex items-start justify-between gap-6">
+                  <div className="flex flex-col gap-3 min-w-0">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <p className="text-[16px] font-semibold text-[#181D17]">
+                        Skrining —{' '}
+                        {screening.createdAt ? formatDate(screening.createdAt) : 'Tanggal tidak tersedia'}
+                      </p>
+                      <div
+                        className="px-3 py-1 rounded-full text-[12px] font-semibold"
+                        style={{ background: riskColor.bg, color: riskColor.text }}
+                      >
+                        Risiko {formatRiskCategory(screening.riskCategory)}
+                      </div>
+                    </div>
+
+                    <p className="text-[14px] text-[#40493D]">
+                      Skor Kesehatan:{' '}
+                      <strong>{formatRiskScore(screening.riskScore)}/100</strong>
+                    </p>
+
+                    <div className="flex flex-wrap gap-2">
+                      {screening.bmi != null && (
+                        <span className="px-3 py-1 rounded-full bg-[#F0F5EB] text-[#40493D] text-[12px] font-medium">
+                          BMI {screening.bmi.toFixed(1)}
+                        </span>
+                      )}
+                      {screening.systolicBp != null &&
+                        screening.diastolicBp != null && (
+                          <span className="px-3 py-1 rounded-full bg-[#F0F5EB] text-[#40493D] text-[12px] font-medium">
+                            BP {screening.systolicBp}/{screening.diastolicBp}
+                          </span>
+                        )}
+                      {screening.bloodGlucose != null && (
+                        <span className="px-3 py-1 rounded-full bg-[#F0F5EB] text-[#40493D] text-[12px] font-medium">
+                          Gula {screening.bloodGlucose} mg/dL
+                        </span>
+                      )}
+                    </div>
+
+                    <p className="text-[13px] text-[#5E6D60]">
+                      {[
+                        bpStatus ? `Status BP: ${bpStatus}` : null,
+                        glucoseStatus ? `Gula: ${glucoseStatus}` : null,
+                      ]
+                        .filter(Boolean)
+                        .join(' • ') || 'Klik untuk melihat analisis lengkap'}
+                    </p>
+                  </div>
+
+                  <div className="text-[#0D631B] text-[14px] font-semibold whitespace-nowrap self-center">
+                    Lihat Detail →
+                  </div>
                 </div>
               </Link>
             );

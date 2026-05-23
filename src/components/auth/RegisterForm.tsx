@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { validateRegister } from '@/lib/validations';
 import Input from '@/components/ui/Input';
@@ -10,6 +11,7 @@ import Alert from '@/components/ui/Alert';
 
 export default function RegisterForm() {
   const { register } = useAuth();
+  const router = useRouter();
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [apiError, setApiError] = useState('');
@@ -24,6 +26,8 @@ export default function RegisterForm() {
     setLoading(true);
     try {
       await register(form);
+      router.push('/dashboard');
+      router.refresh();
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { error?: { message?: string } } } })

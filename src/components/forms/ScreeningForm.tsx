@@ -104,13 +104,54 @@ function NumberStepper({
   label: string; value: number; min: number; max: number; onChange: (v: number) => void;
 }) {
   const clamp = (v: number) => Math.max(min, Math.min(max, v));
+  const [draft, setDraft] = useState(String(value));
+  const [isFocused, setIsFocused] = useState(false);
+
+  function commit(nextRaw: string) {
+    if (!nextRaw.trim()) {
+      setDraft(String(value));
+      return;
+    }
+
+    const parsed = Number.parseInt(nextRaw, 10);
+    if (Number.isNaN(parsed)) {
+      setDraft(String(value));
+      return;
+    }
+
+    const nextValue = clamp(parsed);
+    setDraft(String(nextValue));
+    if (nextValue !== value) {
+      onChange(nextValue);
+    }
+  }
+
   return (
     <div className="flex flex-col gap-[8.8px]">
       <label className="text-[14px] font-semibold leading-[16.8px] tracking-[0.14px] text-[#40493D]">{label}</label>
       <div className="flex items-center h-[50px] bg-white rounded-[12px] overflow-hidden"
         style={{ border: '1px solid #BFCABA' }}>
-        <input type="number" value={value} min={min} max={max}
-          onChange={(e) => { const n = parseInt(e.target.value, 10); if (!isNaN(n)) onChange(clamp(n)); }}
+        <input
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          value={isFocused ? draft : String(value)}
+          placeholder={`${min} - ${max}`}
+          onChange={(e) => setDraft(e.target.value.replace(/[^\d]/g, ''))}
+          onFocus={() => {
+            setIsFocused(true);
+            setDraft(String(value));
+          }}
+          onBlur={(e) => {
+            commit(e.target.value);
+            setIsFocused(false);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              commit(draft);
+              (e.currentTarget as HTMLInputElement).blur();
+            }
+          }}
           className="flex-1 pl-4 h-full text-[16px] font-normal text-[#6B7280] bg-transparent outline-none" />
         <div className="flex flex-col h-full" style={{ borderLeft: '1px solid #BFCABA' }}>
           <button type="button" onClick={() => onChange(clamp(value + 1))}
@@ -130,17 +171,27 @@ function NumberStepper({
           </button>
         </div>
       </div>
+      <p className="text-[12px] font-medium leading-[14.4px] text-[#40493D]">
+        Masukkan angka antara {min} sampai {max}.
+      </p>
     </div>
   );
 }
 
 function ToggleSwitch({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
-    <button type="button" role="switch" aria-checked={checked} onClick={() => onChange(!checked)}
-      className="relative flex-shrink-0 w-14 h-7 rounded-full transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#318741]"
-      style={{ background: checked ? '#318741' : '#BFCABA' }}>
-      <span className="absolute top-[3px] w-[22px] h-[22px] rounded-full bg-white shadow-sm transition-transform duration-200"
-        style={{ transform: checked ? 'translateX(29px)' : 'translateX(3px)' }} />
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      className="relative inline-flex h-8 w-14 flex-shrink-0 items-center rounded-full p-[3px] box-border transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#318741] focus-visible:ring-offset-2"
+      style={{ background: checked ? '#318741' : '#BFCABA' }}
+    >
+      <span
+        className="block h-[26px] w-[26px] rounded-full bg-white shadow-sm transition-transform duration-200"
+        style={{ transform: checked ? 'translateX(24px)' : 'translateX(0)' }}
+      />
     </button>
   );
 }
@@ -172,14 +223,22 @@ function RadioOption({ selected, label, onSelect }: {
   selected: boolean; label: string; onSelect: () => void;
 }) {
   return (
-    <button type="button" onClick={onSelect}
-      className="flex items-center gap-3 p-4 rounded-[12px] transition-colors"
-      style={{ border: `1px solid ${selected ? '#318741' : '#BFCABA'}`, background: selected ? 'rgba(49,135,65,0.04)' : 'white', height: '54px' }}>
+    <button
+      type="button"
+      onClick={onSelect}
+      className="flex min-h-[54px] w-full items-center gap-3 rounded-[12px] px-4 py-3 text-left box-border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#318741] focus-visible:ring-offset-2"
+      style={{
+        border: `1px solid ${selected ? '#318741' : '#BFCABA'}`,
+        background: selected ? 'rgba(49,135,65,0.04)' : 'white',
+      }}
+    >
       <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors"
         style={{ borderColor: selected ? '#0D631B' : '#BFCABA' }}>
         {selected && <div className="w-2.5 h-2.5 rounded-full bg-[#0D631B]" />}
       </div>
-      <span className="text-[14px] font-semibold leading-[16.8px] tracking-[0.14px] text-[#181D17]">{label}</span>
+      <span className="text-[14px] font-semibold leading-[16.8px] tracking-[0.14px] text-[#181D17]">
+        {label}
+      </span>
     </button>
   );
 }

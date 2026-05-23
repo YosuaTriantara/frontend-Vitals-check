@@ -4,11 +4,13 @@ import Link from 'next/link';
 interface LastScreeningCardProps {
   date?: string;
   status?: string;
+  detailHref?: string;
 }
 
 export default function LastScreeningCard({
   date = '12 April 2025',
   status = 'Lengkap & Stabil',
+  detailHref = '/health-data',
 }: LastScreeningCardProps) {
   return (
     <div
@@ -40,7 +42,7 @@ export default function LastScreeningCard({
       <div className="pt-[7px] border-t border-[#BFCABA]">
         <div className="pt-4">
           <Link
-            href="/health-data"
+            href={detailHref}
             className="flex items-center gap-2 text-[16px] font-normal text-[#0D631B] leading-[24px] hover:underline"
           >
             Lihat Detail Laporan

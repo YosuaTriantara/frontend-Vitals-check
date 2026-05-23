@@ -25,7 +25,6 @@ interface RiskGaugeProps {
 }
 
 export default function RiskGauge({ score, size = 192 }: RiskGaugeProps) {
-  const scale = size / SIZE;
   const filledLen = ARC_LEN * (Math.max(0, Math.min(100, score)) / 100);
   const color = gaugeColor(score);
 

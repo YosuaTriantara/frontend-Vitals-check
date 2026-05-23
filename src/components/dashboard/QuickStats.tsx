@@ -1,4 +1,6 @@
 import Image from 'next/image';
+import { getBMICategory, getBPCategory } from '@/utils/calculations';
+import { formatNumber } from '@/utils/formatters';
 
 interface StatCardProps {
   iconSrc: string;
@@ -9,6 +11,15 @@ interface StatCardProps {
   badge: string;
   badgeBg: string;
   badgeText: string;
+}
+
+interface QuickStatsProps {
+  bloodPressure?: {
+    systolic: number;
+    diastolic: number;
+  } | null;
+  bmi?: number | null;
+  totalScreenings?: number;
 }
 
 export function StatCard({
@@ -67,39 +78,54 @@ export function StatCard({
   );
 }
 
-/** Default quick stats column with BP, BMI, Activity */
-export default function QuickStats() {
+export default function QuickStats({
+  bloodPressure = null,
+  bmi = null,
+  totalScreenings,
+}: QuickStatsProps) {
+  const bpValue = bloodPressure
+    ? `${bloodPressure.systolic}/${bloodPressure.diastolic}`
+    : '120/80';
+  const bpBadge = bloodPressure
+    ? getBPCategory(bloodPressure.systolic, bloodPressure.diastolic)
+    : { label: 'Normal', color: '#0D631B' };
+
+  const bmiValue = bmi != null ? bmi.toFixed(1) : '22.4';
+  const bmiBadge = bmi != null
+    ? getBMICategory(bmi)
+    : { label: 'Ideal', color: '#0D631B' };
+
   return (
     <div className="flex flex-col gap-6">
       <StatCard
         iconSrc="/icons/icon-bp.svg"
         iconAlt="Tekanan Darah"
         label="Tekanan Darah"
-        value="120/80"
+        value={bpValue}
         unit="mmHg"
-        badge="Normal"
+        badge={bpBadge.label}
         badgeBg="rgba(13, 99, 27, 0.1)"
-        badgeText="#0D631B"
+        badgeText={bpBadge.color}
       />
       <StatCard
         iconSrc="/icons/icon-bmi.svg"
         iconAlt="BMI"
         label="BMI (IMT)"
-        value="22.4"
+        value={bmiValue}
         unit="kg/m²"
-        badge="Ideal"
+        badge={bmiBadge.label}
         badgeBg="rgba(13, 99, 27, 0.1)"
-        badgeText="#0D631B"
+        badgeText={bmiBadge.color}
       />
       <StatCard
         iconSrc="/icons/icon-activity.svg"
-        iconAlt="Aktivitas"
-        label="Aktivitas"
-        value="6,420"
-        unit="Langkah"
-        badge="-12%"
-        badgeBg="#FFDAD6"
-        badgeText="#BA1A1A"
+        iconAlt="Riwayat Skrining"
+        label="Total Skrining"
+        value={formatNumber(totalScreenings ?? 0)}
+        unit="Data"
+        badge="Tersimpan"
+        badgeBg="rgba(13, 99, 27, 0.1)"
+        badgeText="#0D631B"
       />
     </div>
   );

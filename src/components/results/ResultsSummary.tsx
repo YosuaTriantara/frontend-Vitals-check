@@ -4,7 +4,6 @@ import RiskGauge from '@/components/charts/RiskGauge';
 import {
   healthScoreFromRisk,
   getRiskBadge,
-  getBMICategory,
   getGlucoseStatus,
 } from '@/utils/calculations';
 import type { RiskCategory } from '@/types/screening';

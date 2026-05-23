@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState } from 'react';
 import { User, LoginRequest, RegisterRequest } from '@/types/user';
 import { setToken, setUser, clearAuth, getUser, getToken, setOnboardingStatus } from '@/utils/storage';
 import apiClient from '@/lib/api';
@@ -16,17 +16,12 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUserState] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
+  const [user, setUserState] = useState<User | null>(() => {
     const token = getToken();
     const savedUser = getUser();
-    if (token && savedUser) {
-      setUserState(savedUser);
-    }
-    setIsLoading(false);
-  }, []);
+    return token && savedUser ? savedUser : null;
+  });
+  const [isLoading] = useState(false);
 
   async function login(data: LoginRequest) {
     const response = await apiClient.post('/auth/login', data);

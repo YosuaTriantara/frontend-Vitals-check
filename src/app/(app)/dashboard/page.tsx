@@ -1,20 +1,127 @@
-import Image from "next/image";
-import Link from "next/link";
-import HealthTrendChart from "@/components/dashboard/HealthTrendChart";
-import LastScreeningCard from "@/components/dashboard/LastScreeningCard";
-import QuickStats from "@/components/dashboard/QuickStats";
+'use client';
 
-/* ─── Card: Health Score ─────────────────────────────────────── */
-function HealthScoreCard() {
+import Image from 'next/image';
+import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
+import Alert from '@/components/ui/Alert';
+import HealthTrendChart from '@/components/dashboard/HealthTrendChart';
+import LastScreeningCard from '@/components/dashboard/LastScreeningCard';
+import QuickStats from '@/components/dashboard/QuickStats';
+import { useScreeningList } from '@/hooks/useScreening';
+import { useTrends } from '@/hooks/useTrends';
+import {
+  getBMICategory,
+  getBPCategory,
+  getGlucoseStatus,
+  healthScoreFromRisk,
+} from '@/utils/calculations';
+import { formatDate, formatRiskCategory } from '@/utils/formatters';
+import type { Screening } from '@/types/screening';
+
+function getLatestScreening(screenings: Screening[]) {
+  return [...screenings].sort(
+    (a, b) =>
+      new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime(),
+  );
+}
+
+function getDisplayDate(date?: string) {
+  return date ? formatDate(date) : 'Tanggal tidak tersedia';
+}
+
+function buildRecommendations(screening: Screening | null) {
+  if (!screening) {
+    return [
+      'Mulai skrining pertama untuk mendapatkan rekomendasi kesehatan personal.',
+      'Catat tekanan darah, BMI, dan gula darah Anda secara berkala.',
+      'Jaga pola makan dan aktivitas fisik minimal 30 menit per hari.',
+    ];
+  }
+
+  const items: string[] = [];
+
+  if (screening.bloodGlucose != null && screening.bloodGlucose > 100) {
+    items.push('Batasi minuman manis dan evaluasi kadar gula darah secara rutin.');
+  }
+
+  if (screening.bmi != null && screening.bmi >= 25) {
+    items.push('Fokus pada penurunan berat badan bertahap melalui pola makan seimbang.');
+  }
+
+  if (screening.systolicBp != null && screening.diastolicBp != null) {
+    const bp = getBPCategory(screening.systolicBp, screening.diastolicBp);
+    if (bp.label !== 'Normal') {
+      items.push('Kurangi asupan garam dan pantau tekanan darah setidaknya mingguan.');
+    }
+  }
+
+  items.push('Lakukan olahraga ringan 30 menit setiap hari untuk menjaga tren kesehatan.');
+  items.push('Ulangi skrining berkala agar dashboard menampilkan tren yang lebih akurat.');
+
+  return items.slice(0, 3);
+}
+
+function buildWeeklyData(screenings: Screening[]) {
+  return screenings.slice(0, 7).reverse().map((screening, index) => ({
+    label: `S${index + 1}`,
+    value: healthScoreFromRisk(screening.riskScore),
+  }));
+}
+
+function buildMonthlyData(screenings: Screening[]) {
+  const grouped = new Map<string, { total: number; count: number }>();
+
+  screenings.forEach((screening) => {
+    const rawDate = screening.createdAt ? new Date(screening.createdAt) : null;
+    if (!rawDate || Number.isNaN(rawDate.getTime())) {
+      return;
+    }
+    const key = `${rawDate.getFullYear()}-${rawDate.getMonth()}`;
+    const current = grouped.get(key) ?? { total: 0, count: 0 };
+    current.total += healthScoreFromRisk(screening.riskScore);
+    current.count += 1;
+    grouped.set(key, current);
+  });
+
+  return Array.from(grouped.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .slice(-7)
+    .map(([key, value]) => {
+      const [year, month] = key.split('-').map(Number);
+      const date = new Date(year, month, 1);
+      return {
+        label: date.toLocaleDateString('id-ID', { month: 'short' }),
+        value: Math.round(value.total / value.count),
+      };
+    });
+}
+
+function HealthScoreCard({
+  score,
+  delta,
+  riskLabel,
+}: {
+  score: number;
+  delta: number | null;
+  riskLabel: string;
+}) {
+  const trendText =
+    delta == null
+      ? 'Belum cukup data untuk membandingkan tren'
+      : delta > 0
+        ? `Meningkat ${delta}% dari skrining sebelumnya`
+        : delta < 0
+          ? `Turun ${Math.abs(delta)}% dari skrining sebelumnya`
+          : 'Stabil dibanding skrining sebelumnya';
+
   return (
     <div
       className="bg-white rounded-[20px] p-8 flex flex-col justify-between"
       style={{
-        border: "1px solid rgba(13, 99, 27, 0.05)",
-        boxShadow: "0px 4px 20px 0px rgba(13, 99, 27, 0.05)",
+        border: '1px solid rgba(13, 99, 27, 0.05)',
+        boxShadow: '0px 4px 20px 0px rgba(13, 99, 27, 0.05)',
       }}
     >
-      {/* Header */}
       <div className="flex items-center justify-between pb-6">
         <span className="text-[14px] font-semibold text-[#40493D] leading-[16.8px] tracking-[5%] uppercase">
           Health Score
@@ -27,30 +134,33 @@ function HealthScoreCard() {
         />
       </div>
 
-      {/* Score */}
-      <div className="flex items-baseline gap-2">
-        <span
-          className="text-[48px] font-extrabold leading-[57.6px] text-[#0D631B]"
-          style={{ letterSpacing: "-2%" }}
-        >
-          84
-        </span>
-        <span className="text-[18px] font-normal text-[#40493D] leading-[28.8px]">
-          /100
-        </span>
+      <div>
+        <div className="flex items-baseline gap-2">
+          <span
+            className="text-[48px] font-extrabold leading-[57.6px] text-[#0D631B]"
+            style={{ letterSpacing: '-2%' }}
+          >
+            {score}
+          </span>
+          <span className="text-[18px] font-normal text-[#40493D] leading-[28.8px]">
+            /100
+          </span>
+        </div>
+        <p className="mt-2 text-[16px] font-normal leading-[25.6px] text-[#40493D]">
+          Risiko saat ini: {riskLabel}
+        </p>
       </div>
 
-      {/* Trend */}
       <div className="pt-4 border-t border-[#BFCABA] mt-4">
         <div className="flex items-center gap-2">
           <Image
             src="/icons/icon-trending-up.svg"
-            alt="Trending up"
+            alt="Health trend"
             width={12}
             height={7}
           />
           <span className="text-[16px] font-normal text-[#0D631B] leading-[24px]">
-            Meningkat 4% dari bulan lalu
+            {trendText}
           </span>
         </div>
       </div>
@@ -58,24 +168,20 @@ function HealthScoreCard() {
   );
 }
 
-/* ─── Card: Recommendations ──────────────────────────────────── */
-function RecommendationsCard() {
-  const recommendations = [
-    "Tingkatkan konsumsi air mineral (min. 2.5L)",
-    "Lakukan olahraga ringan 30 menit setiap hari",
-    "Kurangi konsumsi makanan tinggi garam",
-  ];
-
+function RecommendationsCard({
+  recommendations,
+}: {
+  recommendations: string[];
+}) {
   return (
     <div
       className="rounded-[20px] p-8 flex flex-col gap-4"
       style={{
-        border: "1px solid rgba(18, 109, 39, 0.1)",
-        boxShadow: "0px 4px 20px 0px rgba(13, 99, 27, 0.05)",
-        paddingBottom: "45.81px",
+        border: '1px solid rgba(18, 109, 39, 0.1)',
+        boxShadow: '0px 4px 20px 0px rgba(13, 99, 27, 0.05)',
+        paddingBottom: '45.81px',
       }}
     >
-      {/* Header */}
       <div className="flex items-center gap-3">
         <Image
           src="/icons/icon-recommend.svg"
@@ -88,10 +194,9 @@ function RecommendationsCard() {
         </span>
       </div>
 
-      {/* List */}
       <ul className="flex flex-col gap-4 mt-2">
-        {recommendations.map((item, i) => (
-          <li key={i} className="flex gap-3 items-start">
+        {recommendations.map((item) => (
+          <li key={item} className="flex gap-3 items-start">
             <div className="mt-2 flex-shrink-0">
               <div className="w-[6px] h-[6px] rounded-full bg-[#126D27]" />
             </div>
@@ -105,24 +210,61 @@ function RecommendationsCard() {
   );
 }
 
-// StatCard moved to components/dashboard/QuickStats.tsx
-
-/* ─── Dashboard Page ─────────────────────────────────────────── */
 export default function DashboardPage() {
+  const { user } = useAuth();
+  const { data: screenings, loading, error } = useScreeningList();
+  const ordered = getLatestScreening(screenings);
+  const latest = ordered[0] ?? null;
+  const previous = ordered[1] ?? null;
+  const { riskScoreTrend } = useTrends(ordered);
+
+  const healthScore = latest ? healthScoreFromRisk(latest.riskScore) : 84;
+  const previousScore = previous ? healthScoreFromRisk(previous.riskScore) : null;
+  const scoreDelta =
+    previousScore == null ? null : healthScore - previousScore;
+
+  const lastStatus = latest
+    ? [
+        latest.bmi != null ? getBMICategory(latest.bmi).label : null,
+        latest.systolicBp != null && latest.diastolicBp != null
+          ? getBPCategory(latest.systolicBp, latest.diastolicBp).label
+          : null,
+        latest.bloodGlucose != null
+          ? getGlucoseStatus(latest.bloodGlucose).label
+          : null,
+      ]
+        .filter(Boolean)
+        .join(' • ')
+    : 'Lengkap & Stabil';
+
+  const weeklyData =
+    ordered.length > 0 ? buildWeeklyData(ordered) : riskScoreTrend.slice(-7).map((point, index) => ({
+      label: `S${index + 1}`,
+      value: point.value,
+    }));
+  const monthlyData = ordered.length > 0 ? buildMonthlyData(ordered) : [];
+  const recommendations = buildRecommendations(latest);
+
   return (
     <div className="px-9 py-8 flex flex-col gap-6">
-      {/* Welcome Section */}
-      <section className="flex items-end justify-between">
+      {error && (
+        <Alert variant="warning">
+          Gagal memuat data dashboard dari API. Data fallback sedang ditampilkan.
+        </Alert>
+      )}
+
+      <section className="flex items-end justify-between gap-6">
         <div className="max-w-[576px]">
           <h1
             className="text-[32px] font-bold leading-[41.6px] text-[#0F6D2B]"
-            style={{ letterSpacing: "-0.32px", fontFamily: "var(--font-body)" }}
+            style={{ letterSpacing: '-0.32px', fontFamily: 'var(--font-body)' }}
           >
-            Selamat Pagi, User
+            Selamat Datang, {user?.name ?? 'User'}
           </h1>
           <p className="mt-3 text-[18px] font-normal leading-[28.8px] text-[#40493D]">
-            Berdasarkan data terakhir, hari ini adalah waktu yang tepat untuk
-            melakukan skrining kesehatan rutin Anda. Hanya membutuhkan 5 menit.
+            {latest
+              ? `Skrining terakhir Anda tercatat pada ${getDisplayDate(latest.createdAt)}. Pantau perubahan skor kesehatan dan lanjutkan skrining rutin.`
+              : 'Belum ada data skrining dari API. Mulai skrining pertama Anda untuk mengisi dashboard secara otomatis.'}
           </p>
         </div>
 
@@ -136,24 +278,42 @@ export default function DashboardPage() {
             width={20}
             height={20}
           />
-          Mulai Skrining Risiko
+          {loading ? 'Memuat Data Skrining...' : 'Mulai Skrining Risiko'}
         </Link>
       </section>
 
-      {/* Bento Grid */}
       <section className="grid grid-cols-3 gap-6 pt-4">
-        {/* Row 1: 3 cards */}
-        <HealthScoreCard />
-        <LastScreeningCard />
-        <RecommendationsCard />
+        <HealthScoreCard
+          score={healthScore}
+          delta={scoreDelta}
+          riskLabel={latest ? formatRiskCategory(latest.riskCategory) : 'Belum tersedia'}
+        />
+        <LastScreeningCard
+          date={latest ? getDisplayDate(latest.createdAt) : 'Belum ada data'}
+          status={lastStatus}
+          detailHref={latest?.id ? `/results/${latest.id}` : '/health-data'}
+        />
+        <RecommendationsCard recommendations={recommendations} />
 
-        {/* Row 2: Chart (2/3) + Stats (1/3) */}
         <div className="col-span-2">
-          <HealthTrendChart />
+          <HealthTrendChart
+            weeklyData={weeklyData.length > 0 ? weeklyData : undefined}
+            monthlyData={monthlyData.length > 0 ? monthlyData : undefined}
+          />
         </div>
 
-        {/* Stats Column */}
-        <QuickStats />
+        <QuickStats
+          bloodPressure={
+            latest?.systolicBp != null && latest?.diastolicBp != null
+              ? {
+                  systolic: latest.systolicBp,
+                  diastolic: latest.diastolicBp,
+                }
+              : null
+          }
+          bmi={latest?.bmi ?? null}
+          totalScreenings={ordered.length}
+        />
       </section>
     </div>
   );

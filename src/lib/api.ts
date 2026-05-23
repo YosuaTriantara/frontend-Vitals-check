@@ -22,6 +22,9 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       if (typeof window !== 'undefined') {
         localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('isOnboarded');
+        document.cookie = 'token=; Path=/; Max-Age=0; SameSite=Lax';
         window.location.href = '/login';
       }
     }
