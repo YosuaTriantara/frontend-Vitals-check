@@ -19,6 +19,13 @@
     box-sizing: border-box;
 }
 
+html {
+    /* Prevent mobile browsers (iOS Safari, Chrome Android) from
+       auto-scaling text — the main cause of the "zoomed" appearance. */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
 html,
 body {
     margin: 0;
