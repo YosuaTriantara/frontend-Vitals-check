@@ -1,8 +1,11 @@
 'use client';
 
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { User, LoginRequest, RegisterRequest } from '@/types/user';
-import { setToken, setUser, clearAuth, getUser, getToken, setOnboardingStatus, setTokenCookie, clearTokenCookie } from '@/utils/storage';
+import {
+  setToken, setUser, clearAuth, getToken,
+  setOnboardingStatus, setTokenCookie, clearTokenCookie
+} from '@/utils/storage';
 import apiClient from '@/lib/api';
 
 interface AuthContextType {
@@ -16,12 +19,32 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUserState] = useState<User | null>(() => {
-    const token = getToken();
-    const savedUser = getUser();
-    return token && savedUser ? savedUser : null;
-  });
-  const [isLoading] = useState(false);
+  const [user, setUserState] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function checkAuth() {
+      const token = getToken();
+
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const response = await apiClient.get('/auth/me');
+        setUserState(response.data.data);
+      } catch {
+        clearAuth();
+        clearTokenCookie();
+        setUserState(null);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    checkAuth();
+  }, []);
 
   async function login(data: LoginRequest) {
     const response = await apiClient.post('/auth/login', data);
@@ -45,8 +68,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   function logout() {
     clearAuth();
-    clearTokenCookie(); 
+    clearTokenCookie();
     setUserState(null);
+    window.location.href = '/login';
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-white">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#318741] border-t-transparent" />
+      </div>
+    );
   }
 
   return (
