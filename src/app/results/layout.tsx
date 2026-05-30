@@ -7,11 +7,15 @@ export default function ResultsLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="min-h-screen bg-white overflow-x-hidden">
       <Sidebar />
-      <div className="ml-[326px] flex flex-col flex-1 min-h-screen">
+
+      <div className="flex min-h-screen flex-col pt-[72px] lg:pt-0 lg:ml-[326px]">
         <AppHeader />
-        <main className="flex-1 overflow-auto">{children}</main>
+
+        <main className="flex-1 overflow-x-hidden">
+          {children}
+        </main>
       </div>
     </div>
   );

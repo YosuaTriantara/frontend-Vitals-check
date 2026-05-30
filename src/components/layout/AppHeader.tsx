@@ -33,7 +33,7 @@ export default function AppHeader() {
   const initials = user?.name ? user.name.charAt(0).toUpperCase() : "U";
 
   return (
-    <header className="h-[83px] bg-[#F6FBF1] flex items-center justify-end px-9 gap-5 border-b border-[#BFCABA]/40">
+    <header className="hidden lg:flex h-[83px] bg-[#F6FBF1] items-center justify-end px-9 gap-5 border-b border-[#BFCABA]/40">
       {/* Bell */}
       <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[rgba(15,109,43,0.08)] transition-colors">
         <Image

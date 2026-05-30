@@ -247,22 +247,23 @@ export default function DashboardPage() {
   const recommendations = buildRecommendations(latest);
 
   return (
-    <div className="px-9 py-8 flex flex-col gap-6">
+    <div className="px-4 py-6 md:px-6 lg:px-9 lg:py-8 flex flex-col gap-5 lg:gap-6 overflow-x-hidden">
       {error && (
         <Alert variant="warning">
           Gagal memuat data dashboard dari API. Tidak ada data yang ditampilkan sampai API tersedia.
         </Alert>
       )}
 
-      <section className="flex items-end justify-between gap-6">
-        <div className="max-w-[576px]">
+      <section className="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-5 min-w-0">
+        <div className="max-w-[576px] min-w-0">
           <h1
-            className="text-[32px] font-bold leading-[41.6px] text-[#0F6D2B]"
+            className="text-[26px] md:text-[32px] font-bold leading-[34px] md:leading-[41.6px] text-[#0F6D2B] break-words"
             style={{ letterSpacing: '-0.32px', fontFamily: 'var(--font-body)' }}
           >
             Selamat Datang, {user?.name ?? 'User'}
           </h1>
-          <p className="mt-3 text-[18px] font-normal leading-[28.8px] text-[#40493D]">
+
+          <p className="mt-3 text-[15px] md:text-[18px] font-normal leading-[24px] md:leading-[28.8px] text-[#40493D] break-words">
             {latest
               ? `Skrining terakhir Anda tercatat pada ${getDisplayDate(latest.createdAt)}. Pantau perubahan skor kesehatan dan lanjutkan skrining rutin.`
               : 'Belum ada data skrining dari API. Mulai skrining pertama Anda untuk mengisi dashboard secara otomatis.'}
@@ -271,35 +272,62 @@ export default function DashboardPage() {
 
         <Link
           href="/screening"
-          className="flex items-center gap-3 px-8 py-4 rounded-[12px] bg-[#318741] text-white text-[18px] font-normal leading-[28.8px] hover:bg-[#0F6D2B] transition-colors flex-shrink-0"
+          className="w-full xl:w-auto justify-center flex items-center gap-3 px-6 xl:px-8 py-4 rounded-[12px] bg-[#318741] text-white text-[16px] xl:text-[18px] font-normal leading-[25.6px] xl:leading-[28.8px] hover:bg-[#0F6D2B] transition-colors shrink-0"
         >
           <Image
             src="/icons/icon-screening-btn.svg"
             alt="Screening"
             width={20}
             height={20}
+            className="shrink-0"
           />
-          {loading ? 'Memuat Data Skrining...' : 'Mulai Skrining Risiko'}
+          <span className="break-words text-center">
+            {loading ? 'Memuat Data Skrining...' : 'Mulai Skrining Risiko'}
+          </span>
         </Link>
       </section>
 
-      <section className="grid grid-cols-3 gap-6 pt-4">
-        <HealthScoreCard
-          score={healthScore}
-          delta={scoreDelta}
-          riskLabel={latest ? formatRiskCategory(latest.riskCategory) : 'Belum tersedia'}
-          hasData={hasData}
-          isLoading={loading}
-        />
-        <LastScreeningCard
-          date={latest ? getDisplayDate(latest.createdAt) : 'Belum ada data'}
-          status={lastStatus}
-          detailHref={latest?.id ? `/results/${latest.id}` : '/health-data'}
-          hasData={hasData}
-        />
-        <RecommendationsCard recommendations={recommendations} />
+      <section className="grid grid-cols-1 xl:grid-cols-3 gap-5 xl:gap-6 pt-4 min-w-0">
+        <div className="min-w-0">
+          <HealthScoreCard
+            score={healthScore}
+            delta={scoreDelta}
+            riskLabel={latest ? formatRiskCategory(latest.riskCategory) : 'Belum tersedia'}
+            hasData={hasData}
+            isLoading={loading}
+          />
+        </div>
 
-        <div className="col-span-2">
+        <div className="min-w-0">
+          <LastScreeningCard
+            date={latest ? getDisplayDate(latest.createdAt) : 'Belum ada data'}
+            status={lastStatus}
+            detailHref={latest?.id ? `/results/${latest.id}` : '/health-data'}
+            hasData={hasData}
+          />
+        </div>
+        
+        <div className="min-w-0">
+          <QuickStats
+            bloodPressure={
+              latest?.systolicBp != null && latest?.diastolicBp != null
+                ? {
+                    systolic: latest.systolicBp,
+                    diastolic: latest.diastolicBp,
+                  }
+                : null
+            }
+            bmi={latest?.bmi ?? null}
+            totalScreenings={ordered.length}
+            hasData={hasData}
+          />
+        </div>
+        
+        <div className="min-w-0">
+          <RecommendationsCard recommendations={recommendations} />
+        </div>
+
+        <div className="min-w-0 xl:col-span-2">
           <HealthTrendChart
             weeklyData={weeklyData}
             monthlyData={monthlyData}
@@ -307,19 +335,7 @@ export default function DashboardPage() {
           />
         </div>
 
-        <QuickStats
-          bloodPressure={
-            latest?.systolicBp != null && latest?.diastolicBp != null
-              ? {
-                  systolic: latest.systolicBp,
-                  diastolic: latest.diastolicBp,
-                }
-              : null
-          }
-          bmi={latest?.bmi ?? null}
-          totalScreenings={ordered.length}
-          hasData={hasData}
-        />
+        
       </section>
     </div>
   );

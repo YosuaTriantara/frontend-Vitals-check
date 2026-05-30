@@ -35,29 +35,39 @@ export function StatCard({
 }: StatCardProps) {
   return (
     <div
-      className="bg-white rounded-[20px] px-6 py-6 flex items-center justify-between"
+      className="
+        bg-white rounded-[20px]
+        min-w-[190px] flex-shrink-0
+        px-4 py-4
+        xl:min-w-0 xl:w-full xl:px-6 xl:py-6
+        flex flex-col gap-4
+        xl:flex-row xl:items-center xl:justify-between
+        overflow-hidden
+      "
       style={{
         border: '1px solid rgba(13, 99, 27, 0.05)',
         boxShadow: '0px 4px 20px 0px rgba(13, 99, 27, 0.05)',
       }}
     >
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:gap-4 min-w-0">
         <Image
           src={iconSrc}
           alt={iconAlt}
           width={48}
           height={48}
-          className="rounded-[12px] flex-shrink-0"
+          className="rounded-[12px] shrink-0 w-10 h-10 xl:w-12 xl:h-12"
         />
-        <div>
-          <p className="text-[12px] font-medium text-[#40493D] leading-[14.4px] mb-[-2px]">
+
+        <div className="min-w-0">
+          <p className="text-[12px] font-medium text-[#40493D] leading-[14.4px] break-words">
             {label}
           </p>
-          <div className="flex items-baseline gap-1 mt-[14px]">
-            <span className="text-[24px] font-semibold text-[#181D17] leading-[33.6px]">
+
+          <div className="flex flex-wrap items-baseline gap-1 mt-2 xl:mt-[14px] min-w-0">
+            <span className="text-[22px] xl:text-[24px] font-semibold text-[#181D17] leading-[30px] xl:leading-[33.6px] break-words">
               {value}
             </span>
-            <span className="text-[12px] font-normal text-[#181D17] leading-[14.4px]">
+            <span className="text-[12px] font-normal text-[#181D17] leading-[14.4px] shrink-0">
               {unit}
             </span>
           </div>
@@ -65,11 +75,11 @@ export function StatCard({
       </div>
 
       <div
-        className="px-3 py-[3px] rounded-full"
+        className="self-start xl:self-center px-3 py-[3px] rounded-full max-w-full shrink-0"
         style={{ backgroundColor: badgeBg, paddingBottom: '4.39px' }}
       >
         <span
-          className="text-[12px] font-medium leading-[14.4px]"
+          className="block text-[12px] font-medium leading-[14.4px] truncate"
           style={{ color: badgeText }}
         >
           {badge}
@@ -88,17 +98,26 @@ export default function QuickStats({
   const bpValue = bloodPressure
     ? `${bloodPressure.systolic}/${bloodPressure.diastolic}`
     : '—';
+
   const bpBadge = bloodPressure
     ? getBPCategory(bloodPressure.systolic, bloodPressure.diastolic)
     : { label: hasData ? 'Tidak tersedia' : 'Belum ada data', color: '#40493D' };
 
   const bmiValue = bmi != null ? bmi.toFixed(1) : '—';
+
   const bmiBadge = bmi != null
     ? getBMICategory(bmi)
     : { label: hasData ? 'Tidak tersedia' : 'Belum ada data', color: '#40493D' };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div
+      className="
+        flex gap-4 overflow-x-auto pb-2 min-w-0
+        xl:flex-col xl:gap-6 xl:overflow-visible xl:pb-0
+        [-ms-overflow-style:none] [scrollbar-width:none]
+        [&::-webkit-scrollbar]:hidden
+      "
+    >
       <StatCard
         iconSrc="/icons/icon-bp.svg"
         iconAlt="Tekanan Darah"
@@ -109,6 +128,7 @@ export default function QuickStats({
         badgeBg="rgba(13, 99, 27, 0.1)"
         badgeText={bpBadge.color}
       />
+
       <StatCard
         iconSrc="/icons/icon-bmi.svg"
         iconAlt="BMI"
@@ -119,6 +139,7 @@ export default function QuickStats({
         badgeBg="rgba(13, 99, 27, 0.1)"
         badgeText={bmiBadge.color}
       />
+
       <StatCard
         iconSrc="/icons/icon-activity.svg"
         iconAlt="Riwayat Skrining"

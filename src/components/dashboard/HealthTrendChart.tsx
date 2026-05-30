@@ -25,26 +25,26 @@ export default function HealthTrendChart({
 
   return (
     <div
-      className="bg-white rounded-[20px] p-8 flex flex-col gap-8"
+      className="bg-white rounded-[20px] p-4 md:p-6 lg:p-8 flex flex-col gap-6 lg:gap-8 min-w-0 overflow-hidden"
       style={{
         border: '1px solid rgba(13, 99, 27, 0.05)',
         boxShadow: '0px 4px 20px 0px rgba(13, 99, 27, 0.05)',
       }}
     >
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between min-w-0">
+        <div className="min-w-0">
           <h3
-            className="text-[24px] font-semibold leading-[33.6px] text-[#181D17]"
+            className="text-[20px] md:text-[24px] font-semibold leading-[28px] md:leading-[33.6px] text-[#181D17] break-words"
             style={{ fontFamily: 'var(--font-body)' }}
           >
             Tren Kesehatan
           </h3>
-          <p className="text-[16px] font-normal text-[#40493D] leading-[25.6px]">
+          <p className="mt-1 text-[14px] md:text-[16px] font-normal text-[#40493D] leading-[22.4px] md:leading-[25.6px] break-words">
             Skor kesehatan berdasarkan hasil skrining tersimpan.
           </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 shrink-0">
           <button
             onClick={() => setPeriod('weekly')}
             className={`px-4 py-[7px] rounded-full text-[12px] font-medium leading-[14.4px] transition-colors ${
@@ -69,15 +69,15 @@ export default function HealthTrendChart({
       </div>
 
       {isLoading ? (
-        <div className="flex h-[300px] items-center justify-center rounded-xl bg-[#F6FBF1] text-[16px] font-medium text-[#40493D]">
+        <div className="flex h-[240px] md:h-[300px] items-center justify-center rounded-xl bg-[#F6FBF1] text-center text-[14px] md:text-[16px] font-medium text-[#40493D] px-4">
           Memuat tren kesehatan...
         </div>
       ) : !hasData ? (
-        <div className="flex h-[300px] items-center justify-center rounded-xl bg-[#F6FBF1] text-center text-[16px] font-medium text-[#40493D] px-8">
+        <div className="flex h-[240px] md:h-[300px] items-center justify-center rounded-xl bg-[#F6FBF1] text-center text-[14px] md:text-[16px] font-medium text-[#40493D] px-4 md:px-8">
           Belum ada data tren. Lakukan skrining dan simpan hasilnya untuk melihat perkembangan kesehatan.
         </div>
       ) : (
-        <div className="relative rounded-xl overflow-hidden" style={{ height: 300 }}>
+        <div className="relative rounded-xl overflow-hidden h-[240px] md:h-[300px] min-w-0">
           <div
             className="absolute inset-0 rounded-xl pointer-events-none z-10"
             style={{
@@ -86,20 +86,23 @@ export default function HealthTrendChart({
             }}
           />
 
-          <div className="absolute bottom-0 left-0 right-0 flex items-end justify-evenly px-12 pb-4 h-full gap-4">
+          <div className="absolute bottom-0 left-0 right-0 flex items-end justify-evenly px-2 sm:px-4 md:px-8 lg:px-12 pb-4 h-full gap-2 md:gap-4 min-w-0">
             {data.map((bar, index) => (
-              <div key={`${bar.label}-${index}`} className="flex flex-col items-center gap-2 flex-1">
+              <div
+                key={`${bar.label}-${index}`}
+                className="flex flex-col items-center gap-2 flex-1 min-w-0"
+              >
                 <div
                   className="w-full rounded-t-lg transition-all duration-500"
                   style={{
-                    height: `${Math.max((bar.value / maxValue) * 260, 24)}px`,
+                    height: `${Math.max((bar.value / maxValue) * 220, 24)}px`,
                     backgroundColor: index % 2 === 0 ? '#9CF49C' : '#2E7D32',
-                    minWidth: 40,
+                    minWidth: 22,
                     maxWidth: 56,
                   }}
                   title={`${bar.label}: ${bar.value}`}
                 />
-                <span className="text-[11px] text-[#40493D] font-medium">
+                <span className="text-[10px] md:text-[11px] text-[#40493D] font-medium truncate max-w-full">
                   {bar.label}
                 </span>
               </div>

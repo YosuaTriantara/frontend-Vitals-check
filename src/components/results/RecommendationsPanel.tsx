@@ -107,12 +107,12 @@ function buildRecommendations({
 function RecommendationCard({ rec }: { rec: RecommendationItem }) {
   return (
     <div
-      className="bg-[#F6FBF1] rounded-[20px] p-6 flex flex-col gap-2"
+      className="bg-[#F6FBF1] rounded-[20px] p-5 md:p-6 flex flex-col gap-2 min-w-0 overflow-hidden"
       style={{ border: '1px solid #FFFFFF' }}
     >
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-start justify-between gap-3 mb-2 min-w-0">
         <div
-          className="w-12 h-12 rounded-[12px] flex items-center justify-center flex-shrink-0"
+          className="w-11 h-11 md:w-12 md:h-12 rounded-[12px] flex items-center justify-center shrink-0"
           style={{
             background: rec.iconBg,
             border: '1px solid #BFCABA',
@@ -120,16 +120,21 @@ function RecommendationCard({ rec }: { rec: RecommendationItem }) {
         >
           {rec.icon}
         </div>
+
         <div
-          className="px-2 py-[3px] rounded-[4px] text-[12px] font-medium leading-[14.4px]"
-          style={{ background: rec.badgeBg, color: rec.badgeText, paddingBottom: '4.39px' }}
+          className="px-2 py-[3px] rounded-[4px] text-[11px] md:text-[12px] font-medium leading-[14.4px] shrink-0 max-w-[120px] text-center"
+          style={{
+            background: rec.badgeBg,
+            color: rec.badgeText,
+            paddingBottom: '4.39px',
+          }}
         >
           {rec.badge}
         </div>
       </div>
 
       <p
-        className="text-[14px] font-bold leading-[16.8px]"
+        className="text-[14px] font-bold leading-[16.8px] break-words"
         style={{ letterSpacing: '0.14px', color: '#0F6D2B' }}
       >
         {rec.title}
@@ -137,9 +142,9 @@ function RecommendationCard({ rec }: { rec: RecommendationItem }) {
 
       <ul className="flex flex-col gap-3 mt-2">
         {rec.items.map((item) => (
-          <li key={item} className="flex items-start gap-3">
-            <div className="mt-2 w-[6px] h-[6px] rounded-full bg-[#0D631B] flex-shrink-0" />
-            <span className="text-[16px] font-normal leading-[25.6px] text-[#40493D]">
+          <li key={item} className="flex items-start gap-3 min-w-0">
+            <div className="mt-2 w-[6px] h-[6px] rounded-full bg-[#0D631B] shrink-0" />
+            <span className="text-[14px] md:text-[16px] font-normal leading-[22.4px] md:leading-[25.6px] text-[#40493D] break-words">
               {item}
             </span>
           </li>
@@ -163,29 +168,30 @@ export default function RecommendationsPanel(props: RecommendationsPanelProps) {
 
   return (
     <div
-      className="bg-white rounded-[24px] p-8 flex flex-col gap-8 border-l-[8px] border-l-[#0D631B]"
+      className="bg-white rounded-[24px] p-5 md:p-6 xl:p-8 flex flex-col gap-6 xl:gap-8 border-l-[6px] xl:border-l-[8px] border-l-[#0D631B] min-w-0 overflow-hidden"
       style={{ boxShadow: '0px 4px 20px -2px rgba(13,99,27,0.08)' }}
     >
-      <div className="flex items-center gap-4">
+      <div className="flex items-start gap-4 min-w-0">
         <div
-          className="w-12 h-12 rounded-[16px] flex items-center justify-center flex-shrink-0"
+          className="w-11 h-11 md:w-12 md:h-12 rounded-[16px] flex items-center justify-center shrink-0"
           style={{ background: '#9CF49C' }}
         >
           <svg width="15" height="20" viewBox="0 0 24 24" fill="#0D631B">
             <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
           </svg>
         </div>
-        <div>
-          <p className="text-[24px] font-semibold leading-[33.6px] text-[#181D17]">
+
+        <div className="min-w-0">
+          <p className="text-[20px] md:text-[24px] font-semibold leading-[28px] md:leading-[33.6px] text-[#181D17] break-words">
             Rekomendasi Preventif
           </p>
-          <p className="text-[16px] font-normal leading-[25.6px] text-[#40493D]">
+          <p className="mt-1 text-[14px] md:text-[16px] font-normal leading-[22.4px] md:leading-[25.6px] text-[#40493D] break-words">
             Langkah nyata berdasarkan hasil skrining terbaru Anda.
           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {recommendations.map((rec) => (
           <RecommendationCard key={rec.title} rec={rec} />
         ))}
