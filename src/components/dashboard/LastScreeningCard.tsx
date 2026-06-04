@@ -1,25 +1,23 @@
-import Image from 'next/image';
-import Link from 'next/link';
+import Image from "next/image";
+import Link from "next/link";
 
 interface LastScreeningCardProps {
   date?: string;
-  status?: string;
   detailHref?: string;
   hasData?: boolean;
 }
 
 export default function LastScreeningCard({
-  date = 'Belum ada data',
-  status = 'Lakukan skrining pertama untuk melihat ringkasan terbaru.',
-  detailHref = '/health-data',
+  date = "Belum ada data",
+  detailHref = "/health-data",
   hasData = false,
 }: LastScreeningCardProps) {
   return (
     <div
       className="bg-white rounded-[20px] p-5 md:p-6 lg:p-8 flex flex-col justify-between gap-5 min-w-0 overflow-hidden"
       style={{
-        border: '1px solid rgba(13, 99, 27, 0.05)',
-        boxShadow: '0px 4px 20px 0px rgba(13, 99, 27, 0.05)',
+        border: "1px solid rgba(13, 99, 27, 0.05)",
+        boxShadow: "0px 4px 20px 0px rgba(13, 99, 27, 0.05)",
       }}
     >
       <div className="flex items-center justify-between gap-4 min-w-0">
@@ -38,10 +36,6 @@ export default function LastScreeningCard({
       <div className="min-w-0">
         <p className="text-[20px] md:text-[24px] font-semibold leading-[28px] md:leading-[33.6px] text-[#181D17] break-words">
           {date}
-        </p>
-
-        <p className="mt-2 text-[14px] md:text-[16px] font-normal leading-[22.4px] md:leading-[25.6px] text-[#40493D] break-words">
-          Status: {status}
         </p>
       </div>
 

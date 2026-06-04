@@ -28,11 +28,9 @@ interface FormState {
   smoking: boolean;
   physActivity: boolean;
   fruits: boolean;
+  veggies: boolean;
   heavyDrinker: boolean;
   cholCheck: boolean;
-  systolicBp: number;
-  diastolicBp: number;
-  bloodGlucose: number;
 }
 
 const DEFAULT_FORM: FormState = {
@@ -47,11 +45,9 @@ const DEFAULT_FORM: FormState = {
   smoking: false,
   physActivity: true,
   fruits: true,
+  veggies: true,
   heavyDrinker: false,
   cholCheck: false,
-  systolicBp: 120,
-  diastolicBp: 80,
-  bloodGlucose: 95,
 };
 
 /* ═══════════════════════════════════════════════════════════════
@@ -475,9 +471,16 @@ export default function OnboardingModal({
       gender: form.gender,
       heightCm: form.heightCm,
       weightKg: form.weightKg,
-      systolicBp: form.systolicBp,
-      diastolicBp: form.diastolicBp,
-      bloodGlucose: form.bloodGlucose,
+      genHlth: form.generalHealth,
+      mentHlth: form.mentHlth,
+      physHlth: form.physHlth,
+      diffWalk: form.diffWalk,
+      cholCheck: form.cholCheck,
+      smoker: form.smoking,
+      physActivity: form.physActivity,
+      fruits: form.fruits,
+      veggies: form.veggies,
+      hvyAlcoholConsump: form.heavyDrinker,
     };
     const success = await handleSubmit(payload);
     if (success) onClose();
@@ -917,9 +920,15 @@ export default function OnboardingModal({
                         />
                         <CheckCard
                           checked={form.fruits}
-                          label="Buah & Sayur"
-                          description="Konsumsi harian sesuai anjuran"
+                          label="Konsumsi Buah"
+                          description="Mengkonsumsi buah setiap hari"
                           onChange={(v) => set("fruits", v)}
+                        />
+                        <CheckCard
+                          checked={form.veggies}
+                          label="Konsumsi Sayur"
+                          description="Mengkonsumsi sayur setiap hari"
+                          onChange={(v) => set("veggies", v)}
                         />
                         <CheckCard
                           checked={form.heavyDrinker}
@@ -948,35 +957,6 @@ export default function OnboardingModal({
                           selected={form.cholCheck === false}
                           label="Lebih dari 5 tahun / Belum pernah"
                           onSelect={() => set("cholCheck", false)}
-                        />
-                      </div>
-
-                      {/* Blood pressure */}
-                      <div className="grid grid-cols-2 gap-4">
-                        <NumberStepper
-                          label="Tekanan Darah Sistolik (mmHg)"
-                          value={form.systolicBp}
-                          min={60}
-                          max={250}
-                          onChange={(v) => set("systolicBp", v)}
-                        />
-                        <NumberStepper
-                          label="Tekanan Darah Diastolik (mmHg)"
-                          value={form.diastolicBp}
-                          min={40}
-                          max={150}
-                          onChange={(v) => set("diastolicBp", v)}
-                        />
-                      </div>
-
-                      {/* Blood glucose */}
-                      <div style={{ maxWidth: "calc(50% - 8px)" }}>
-                        <NumberStepper
-                          label="Gula Darah (mg/dL)"
-                          value={form.bloodGlucose}
-                          min={50}
-                          max={500}
-                          onChange={(v) => set("bloodGlucose", v)}
                         />
                       </div>
 

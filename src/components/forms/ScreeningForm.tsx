@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Image from 'next/image';
-import type { ScreeningRequest } from '@/types/screening';
+import { useState } from "react";
+import Image from "next/image";
+import type { ScreeningRequest } from "@/types/screening";
 
 interface FormState {
   age: number;
-  gender: 'male' | 'female';
+  gender: "male" | "female";
   heightCm: number;
   weightKg: number;
   generalHealth: number;
@@ -16,11 +16,9 @@ interface FormState {
   smoking: boolean;
   physActivity: boolean;
   fruits: boolean;
+  veggies: boolean;
   heavyDrinker: boolean;
   cholCheck: boolean;
-  systolicBp: number;
-  diastolicBp: number;
-  bloodGlucose: number;
 }
 
 function calcBmi(h: number, w: number): number {
@@ -29,10 +27,10 @@ function calcBmi(h: number, w: number): number {
 }
 
 function bmiStatus(bmi: number) {
-  if (bmi < 18.5) return { label: 'Kurang', bg: '#FEF9C3', text: '#854D0E' };
-  if (bmi < 25) return { label: 'Normal', bg: '#9CF49C', text: '#19722B' };
-  if (bmi < 30) return { label: 'Kelebihan', bg: '#FFEDD5', text: '#9A3412' };
-  return { label: 'Obesitas', bg: '#FEE2E2', text: '#7F1D1D' };
+  if (bmi < 18.5) return { label: "Kurang", bg: "#FEF9C3", text: "#854D0E" };
+  if (bmi < 25) return { label: "Normal", bg: "#9CF49C", text: "#19722B" };
+  if (bmi < 30) return { label: "Kelebihan", bg: "#FFEDD5", text: "#9A3412" };
+  return { label: "Obesitas", bg: "#FEE2E2", text: "#7F1D1D" };
 }
 
 function trackStyle(value: number, min: number, max: number) {
@@ -55,8 +53,8 @@ function SectionCard({
     <div
       className="bg-[#F6FBF1] rounded-[20px] p-5 md:p-6 xl:p-8 flex flex-col gap-5 xl:gap-6 min-w-0 overflow-hidden"
       style={{
-        border: '1px solid #DCE8DC',
-        boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+        border: "1px solid #DCE8DC",
+        boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
       }}
     >
       <div className="flex items-center gap-3 min-w-0">
@@ -76,7 +74,7 @@ function SliderField({
   min,
   max,
   unit,
-  valueColor = '#0D631B',
+  valueColor = "#0D631B",
   onChange,
 }: {
   label: string;
@@ -161,7 +159,7 @@ function NumberStepper({
 
       <div
         className="flex items-center h-[50px] bg-white rounded-[12px] overflow-hidden min-w-0"
-        style={{ border: '1px solid #BFCABA' }}
+        style={{ border: "1px solid #BFCABA" }}
       >
         <input
           type="text"
@@ -169,7 +167,7 @@ function NumberStepper({
           pattern="[0-9]*"
           value={isFocused ? draft : String(value)}
           placeholder={`${min} - ${max}`}
-          onChange={(e) => setDraft(e.target.value.replace(/[^\d]/g, ''))}
+          onChange={(e) => setDraft(e.target.value.replace(/[^\d]/g, ""))}
           onFocus={() => {
             setIsFocused(true);
             setDraft(String(value));
@@ -179,7 +177,7 @@ function NumberStepper({
             setIsFocused(false);
           }}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') {
+            if (e.key === "Enter") {
               commit(draft);
               (e.currentTarget as HTMLInputElement).blur();
             }
@@ -187,7 +185,10 @@ function NumberStepper({
           className="flex-1 min-w-0 pl-4 h-full text-[16px] font-normal text-[#6B7280] bg-transparent outline-none"
         />
 
-        <div className="flex flex-col h-full shrink-0" style={{ borderLeft: '1px solid #BFCABA' }}>
+        <div
+          className="flex flex-col h-full shrink-0"
+          style={{ borderLeft: "1px solid #BFCABA" }}
+        >
           <button
             type="button"
             onClick={() => onChange(clamp(value + 1))}
@@ -195,11 +196,17 @@ function NumberStepper({
             aria-label="Increment"
           >
             <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
-              <path d="M1 5L5 1L9 5" stroke="#40493D" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              <path
+                d="M1 5L5 1L9 5"
+                stroke="#40493D"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </button>
 
-          <div style={{ height: '1px', background: '#BFCABA' }} />
+          <div style={{ height: "1px", background: "#BFCABA" }} />
 
           <button
             type="button"
@@ -208,7 +215,13 @@ function NumberStepper({
             aria-label="Decrement"
           >
             <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
-              <path d="M1 1L5 5L9 1" stroke="#40493D" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              <path
+                d="M1 1L5 5L9 1"
+                stroke="#40493D"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </button>
         </div>
@@ -235,11 +248,11 @@ function ToggleSwitch({
       aria-checked={checked}
       onClick={() => onChange(!checked)}
       className="relative inline-flex h-8 w-14 shrink-0 items-center rounded-full p-[3px] box-border transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#318741] focus-visible:ring-offset-2"
-      style={{ background: checked ? '#318741' : '#BFCABA' }}
+      style={{ background: checked ? "#318741" : "#BFCABA" }}
     >
       <span
         className="block h-[26px] w-[26px] rounded-full bg-white shadow-sm transition-transform duration-200"
-        style={{ transform: checked ? 'translateX(24px)' : 'translateX(0)' }}
+        style={{ transform: checked ? "translateX(24px)" : "translateX(0)" }}
       />
     </button>
   );
@@ -262,20 +275,26 @@ function CheckCard({
       onClick={() => onChange(!checked)}
       className="flex items-start gap-4 p-4 rounded-[12px] text-left transition-colors min-w-0"
       style={{
-        border: `1px solid ${checked ? '#318741' : '#BFCABA'}`,
-        background: checked ? 'rgba(49,135,65,0.04)' : '#FFFFFF',
+        border: `1px solid ${checked ? "#318741" : "#BFCABA"}`,
+        background: checked ? "rgba(49,135,65,0.04)" : "#FFFFFF",
       }}
     >
       <div
         className="w-5 h-5 mt-0.5 rounded-[4px] shrink-0 flex items-center justify-center transition-colors"
         style={{
-          border: `1px solid ${checked ? 'transparent' : '#BFCABA'}`,
-          background: checked ? '#0D631B' : 'white',
+          border: `1px solid ${checked ? "transparent" : "#BFCABA"}`,
+          background: checked ? "#0D631B" : "white",
         }}
       >
         {checked && (
           <svg width="12" height="9" viewBox="0 0 12 9" fill="none">
-            <path d="M1 4L4.5 7.5L11 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M1 4L4.5 7.5L11 1"
+              stroke="white"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         )}
       </div>
@@ -307,13 +326,13 @@ function RadioOption({
       onClick={onSelect}
       className="flex min-h-[54px] w-full items-center gap-3 rounded-[12px] px-4 py-3 text-left box-border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#318741] focus-visible:ring-offset-2 min-w-0"
       style={{
-        border: `1px solid ${selected ? '#318741' : '#BFCABA'}`,
-        background: selected ? 'rgba(49,135,65,0.04)' : 'white',
+        border: `1px solid ${selected ? "#318741" : "#BFCABA"}`,
+        background: selected ? "rgba(49,135,65,0.04)" : "white",
       }}
     >
       <div
         className="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors"
-        style={{ borderColor: selected ? '#0D631B' : '#BFCABA' }}
+        style={{ borderColor: selected ? "#0D631B" : "#BFCABA" }}
       >
         {selected && <div className="w-2.5 h-2.5 rounded-full bg-[#0D631B]" />}
       </div>
@@ -362,11 +381,11 @@ const LockIcon = () => (
 );
 
 const GENERAL_HEALTH_OPTIONS = [
-  { label: 'Buruk', value: 1 },
-  { label: 'Cukup', value: 2 },
-  { label: 'Baik', value: 3 },
-  { label: 'Sangat Baik', value: 4 },
-  { label: 'Luar Biasa', value: 5 },
+  { label: "Buruk", value: 1 },
+  { label: "Cukup", value: 2 },
+  { label: "Baik", value: 3 },
+  { label: "Sangat Baik", value: 4 },
+  { label: "Luar Biasa", value: 5 },
 ];
 
 export interface ScreeningFormProps {
@@ -384,7 +403,7 @@ export default function ScreeningForm({
 }: ScreeningFormProps) {
   const [form, setForm] = useState<FormState>({
     age: 45,
-    gender: 'male',
+    gender: "male",
     heightCm: 170,
     weightKg: 70,
     generalHealth: 3,
@@ -394,11 +413,9 @@ export default function ScreeningForm({
     smoking: false,
     physActivity: true,
     fruits: true,
+    veggies: true,
     heavyDrinker: false,
     cholCheck: false,
-    systolicBp: 120,
-    diastolicBp: 80,
-    bloodGlucose: 95,
   });
 
   function set<K extends keyof FormState>(key: K, val: FormState[K]) {
@@ -414,14 +431,23 @@ export default function ScreeningForm({
       gender: form.gender,
       heightCm: form.heightCm,
       weightKg: form.weightKg,
-      systolicBp: form.systolicBp,
-      diastolicBp: form.diastolicBp,
-      bloodGlucose: form.bloodGlucose,
+      genHlth: form.generalHealth,
+      mentHlth: form.mentHlth,
+      physHlth: form.physHlth,
+      diffWalk: form.diffWalk,
+      cholCheck: form.cholCheck,
+      smoker: form.smoking,
+      physActivity: form.physActivity,
+      fruits: form.fruits,
+      veggies: form.veggies,
+      hvyAlcoholConsump: form.heavyDrinker,
     });
   }
 
   return (
-    <div className={`mx-auto w-full max-w-[1040px] flex flex-col gap-5 xl:gap-6 min-w-0 ${compact ? '' : 'pb-16'}`}>
+    <div
+      className={`mx-auto w-full max-w-[1040px] flex flex-col gap-5 xl:gap-6 min-w-0 ${compact ? "" : "pb-16"}`}
+    >
       <SectionCard icon={<PersonIcon />} title="Informasi Dasar">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 xl:gap-8 min-w-0">
           <NumberStepper
@@ -429,7 +455,7 @@ export default function ScreeningForm({
             value={form.age}
             min={0}
             max={100}
-            onChange={(v) => set('age', v)}
+            onChange={(v) => set("age", v)}
           />
 
           <div className="flex flex-col gap-4 min-w-0">
@@ -438,22 +464,24 @@ export default function ScreeningForm({
             </span>
 
             <div className="grid grid-cols-2 gap-3 md:gap-4">
-              {([
-                { key: 'male', label: 'Laki-laki' },
-                { key: 'female', label: 'Perempuan' },
-              ] as const).map(({ key, label }) => {
+              {(
+                [
+                  { key: "male", label: "Laki-laki" },
+                  { key: "female", label: "Perempuan" },
+                ] as const
+              ).map(({ key, label }) => {
                 const active = form.gender === key;
 
                 return (
                   <button
                     key={key}
                     type="button"
-                    onClick={() => set('gender', key)}
+                    onClick={() => set("gender", key)}
                     className="py-3 px-3 rounded-[12px] text-[15px] md:text-[16px] font-normal leading-[24px] transition-colors"
                     style={{
-                      background: active ? '#2E7D32' : 'white',
-                      border: `1px solid ${active ? '#318741' : '#BFCABA'}`,
-                      color: active ? '#F6FFF4' : '#181D17',
+                      background: active ? "#2E7D32" : "white",
+                      border: `1px solid ${active ? "#318741" : "#BFCABA"}`,
+                      color: active ? "#F6FFF4" : "#181D17",
                     }}
                   >
                     {label}
@@ -471,7 +499,7 @@ export default function ScreeningForm({
               value={form.heightCm}
               min={50}
               max={250}
-              onChange={(v) => set('heightCm', v)}
+              onChange={(v) => set("heightCm", v)}
             />
 
             <NumberStepper
@@ -479,7 +507,7 @@ export default function ScreeningForm({
               value={form.weightKg}
               min={10}
               max={300}
-              onChange={(v) => set('weightKg', v)}
+              onChange={(v) => set("weightKg", v)}
             />
 
             <div className="flex flex-col gap-[8.8px] min-w-0 md:col-span-2 xl:col-span-1">
@@ -489,23 +517,29 @@ export default function ScreeningForm({
 
               <div
                 className="flex items-center justify-between gap-4 px-4 py-4 rounded-[12px] min-h-[78px] min-w-0"
-                style={{ background: 'rgba(13,99,27,0.05)' }}
+                style={{ background: "rgba(13,99,27,0.05)" }}
               >
                 <div className="min-w-0">
                   <p className="text-[12px] font-medium leading-[14.4px] text-[#40493D]">
                     BMI Kalkulasi
                   </p>
-                  <p className="text-[24px] font-bold leading-[33.6px] mt-2" style={{ color: '#0D631B' }}>
-                    {bmi > 0 ? bmi : '—'}
+                  <p
+                    className="text-[24px] font-bold leading-[33.6px] mt-2"
+                    style={{ color: "#0D631B" }}
+                  >
+                    {bmi > 0 ? bmi : "—"}
                   </p>
                 </div>
 
                 {bmi > 0 && (
                   <div
                     className="px-3 py-[3px] rounded-full shrink-0"
-                    style={{ background: bmiSt.bg, paddingBottom: '4.39px' }}
+                    style={{ background: bmiSt.bg, paddingBottom: "4.39px" }}
                   >
-                    <span className="text-[12px] font-medium leading-[14.4px]" style={{ color: bmiSt.text }}>
+                    <span
+                      className="text-[12px] font-medium leading-[14.4px]"
+                      style={{ color: bmiSt.text }}
+                    >
                       {bmiSt.label}
                     </span>
                   </div>
@@ -530,12 +564,12 @@ export default function ScreeningForm({
                 <button
                   key={value}
                   type="button"
-                  onClick={() => set('generalHealth', value)}
+                  onClick={() => set("generalHealth", value)}
                   className="py-[11px] px-3 rounded-[12px] text-[12px] font-medium leading-[14.4px] transition-colors min-w-0"
                   style={{
-                    background: active ? '#318741' : 'white',
-                    border: `1px solid ${active ? 'white' : '#BFCABA'}`,
-                    color: active ? '#FAFFF9' : '#181D17',
+                    background: active ? "#318741" : "white",
+                    border: `1px solid ${active ? "white" : "#BFCABA"}`,
+                    color: active ? "#FAFFF9" : "#181D17",
                   }}
                 >
                   {label}
@@ -552,7 +586,7 @@ export default function ScreeningForm({
             min={0}
             max={30}
             unit="Hari"
-            onChange={(v) => set('physHlth', v)}
+            onChange={(v) => set("physHlth", v)}
           />
 
           <SliderField
@@ -561,20 +595,20 @@ export default function ScreeningForm({
             min={0}
             max={30}
             unit="Hari"
-            onChange={(v) => set('mentHlth', v)}
+            onChange={(v) => set("mentHlth", v)}
           />
         </div>
 
         <div
           className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-[16px] min-w-0"
-          style={{ border: '1px solid #BFCABA' }}
+          style={{ border: "1px solid #BFCABA" }}
         >
           <div className="flex items-start gap-4 min-w-0">
             <div
               className="w-12 h-12 rounded-full flex items-center justify-center shrink-0"
               style={{
-                background: 'rgba(255,218,214,0.2)',
-                border: '1px solid rgba(186,26,26,0.15)',
+                background: "rgba(255,218,214,0.2)",
+                border: "1px solid rgba(186,26,26,0.15)",
               }}
             >
               <span className="text-[#BA1A1A]">
@@ -592,16 +626,45 @@ export default function ScreeningForm({
             </div>
           </div>
 
-          <ToggleSwitch checked={form.diffWalk} onChange={(v) => set('diffWalk', v)} />
+          <ToggleSwitch
+            checked={form.diffWalk}
+            onChange={(v) => set("diffWalk", v)}
+          />
         </div>
       </SectionCard>
 
       <SectionCard icon={<RunnerIcon />} title="Gaya Hidup">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
-          <CheckCard checked={form.smoking} label="Merokok" description="Pernah merokok setidaknya 100 batang" onChange={(v) => set('smoking', v)} />
-          <CheckCard checked={form.physActivity} label="Aktivitas Fisik" description="Olahraga rutin dalam 30 hari terakhir" onChange={(v) => set('physActivity', v)} />
-          <CheckCard checked={form.fruits} label="Konsumsi Buah & Sayur" description="Mengkonsumsi harian sesuai anjuran" onChange={(v) => set('fruits', v)} />
-          <CheckCard checked={form.heavyDrinker} label="Konsumsi Alkohol Berat" description="Peminum berat sesuai kriteria medis" onChange={(v) => set('heavyDrinker', v)} />
+          <CheckCard
+            checked={form.smoking}
+            label="Merokok"
+            description="Pernah merokok setidaknya 100 batang"
+            onChange={(v) => set("smoking", v)}
+          />
+          <CheckCard
+            checked={form.physActivity}
+            label="Aktivitas Fisik"
+            description="Olahraga rutin dalam 30 hari terakhir"
+            onChange={(v) => set("physActivity", v)}
+          />
+          <CheckCard
+            checked={form.fruits}
+            label="Konsumsi Buah"
+            description="Mengkonsumsi buah setiap hari"
+            onChange={(v) => set("fruits", v)}
+          />
+          <CheckCard
+            checked={form.veggies}
+            label="Konsumsi Sayur"
+            description="Mengkonsumsi sayur setiap hari"
+            onChange={(v) => set("veggies", v)}
+          />
+          <CheckCard
+            checked={form.heavyDrinker}
+            label="Konsumsi Alkohol Berat"
+            description="Peminum berat sesuai kriteria medis"
+            onChange={(v) => set("heavyDrinker", v)}
+          />
         </div>
       </SectionCard>
 
@@ -617,57 +680,27 @@ export default function ScreeningForm({
                 <RadioOption
                   selected={form.cholCheck === true}
                   label="Dalam 5 tahun terakhir"
-                  onSelect={() => set('cholCheck', true)}
+                  onSelect={() => set("cholCheck", true)}
                 />
                 <RadioOption
                   selected={form.cholCheck === false}
                   label="Lebih dari 5 tahun lalu / Belum pernah"
-                  onSelect={() => set('cholCheck', false)}
-                />
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-5 pt-5 border-t border-[rgba(191,202,186,0.3)] min-w-0">
-              <p className="text-[14px] font-semibold leading-[16.8px] tracking-[0.14px] text-[#40493D]">
-                Data Vital Terakhir
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
-                <NumberStepper
-                  label="Tekanan Darah Sistolik (mmHg)"
-                  value={form.systolicBp}
-                  min={60}
-                  max={250}
-                  onChange={(v) => set('systolicBp', v)}
-                />
-
-                <NumberStepper
-                  label="Tekanan Darah Diastolik (mmHg)"
-                  value={form.diastolicBp}
-                  min={40}
-                  max={150}
-                  onChange={(v) => set('diastolicBp', v)}
-                />
-              </div>
-
-              <div className="w-full md:max-w-[calc(50%-8px)] xl:max-w-[calc(50%-8px)]">
-                <NumberStepper
-                  label="Gula Darah (mg/dL)"
-                  value={form.bloodGlucose}
-                  min={50}
-                  max={500}
-                  onChange={(v) => set('bloodGlucose', v)}
+                  onSelect={() => set("cholCheck", false)}
                 />
               </div>
             </div>
           </div>
 
-          <div className="hidden xl:block shrink-0 w-64 rounded-[16px] overflow-hidden" style={{ background: '#E0E4DA' }}>
+          <div
+            className="hidden xl:block shrink-0 w-64 rounded-[16px] overflow-hidden"
+            style={{ background: "#E0E4DA" }}
+          >
             <div className="relative h-64 w-full">
               <div
                 className="absolute inset-0"
                 style={{
-                  background: 'linear-gradient(135deg, #9CF49C 0%, #2E7D32 60%, #0D631B 100%)',
+                  background:
+                    "linear-gradient(135deg, #9CF49C 0%, #2E7D32 60%, #0D631B 100%)",
                   opacity: 0.85,
                 }}
               />
@@ -675,17 +708,25 @@ export default function ScreeningForm({
                 className="absolute inset-0"
                 style={{
                   backgroundImage:
-                    'radial-gradient(circle at 30% 40%, rgba(255,255,255,0.15) 0%, transparent 50%), radial-gradient(circle at 70% 70%, rgba(0,0,0,0.1) 0%, transparent 40%)',
+                    "radial-gradient(circle at 30% 40%, rgba(255,255,255,0.15) 0%, transparent 50%), radial-gradient(circle at 70% 70%, rgba(0,0,0,0.1) 0%, transparent 40%)",
                 }}
               />
               <div className="absolute inset-0 flex items-center justify-center">
-                <svg width="80" height="80" viewBox="0 0 24 24" fill="rgba(255,255,255,0.4)">
+                <svg
+                  width="80"
+                  height="80"
+                  viewBox="0 0 24 24"
+                  fill="rgba(255,255,255,0.4)"
+                >
                   <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm-1 14H7v-2h4v2zm5-4H7v-2h10v2zm0-4H7V7h10v2z" />
                 </svg>
               </div>
               <div
                 className="absolute bottom-0 left-0 right-0 p-4"
-                style={{ background: 'linear-gradient(0deg, rgba(13,99,27,0.6) 0%, rgba(13,99,27,0) 100%)' }}
+                style={{
+                  background:
+                    "linear-gradient(0deg, rgba(13,99,27,0.6) 0%, rgba(13,99,27,0) 100%)",
+                }}
               >
                 <p className="text-[12px] font-bold leading-[14.4px] text-white">
                   Pentingnya Cek Rutin
@@ -709,22 +750,45 @@ export default function ScreeningForm({
           disabled={isLoading}
           className="w-full max-w-[448px] relative flex items-center justify-center gap-3 rounded-[16px] text-white transition-opacity disabled:opacity-70 px-5 py-4 md:py-5"
           style={{
-            background: '#318741',
+            background: "#318741",
             boxShadow:
-              '0px 4px 6px -4px rgba(0,0,0,0.1), 0px 10px 15px -3px rgba(0,0,0,0.1)',
+              "0px 4px 6px -4px rgba(0,0,0,0.1), 0px 10px 15px -3px rgba(0,0,0,0.1)",
           }}
         >
           {isLoading ? (
-            <svg className="animate-spin shrink-0" width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.3)" strokeWidth="3" />
-              <path d="M12 2a10 10 0 0 1 10 10" stroke="white" strokeWidth="3" strokeLinecap="round" />
+            <svg
+              className="animate-spin shrink-0"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="rgba(255,255,255,0.3)"
+                strokeWidth="3"
+              />
+              <path
+                d="M12 2a10 10 0 0 1 10 10"
+                stroke="white"
+                strokeWidth="3"
+                strokeLinecap="round"
+              />
             </svg>
           ) : (
-            <Image src="/icons/icon-screening-btn.svg" alt="" width={16} height={20} className="shrink-0" />
+            <Image
+              src="/icons/icon-screening-btn.svg"
+              alt=""
+              width={16}
+              height={20}
+              className="shrink-0"
+            />
           )}
 
           <span className="text-[18px] md:text-[24px] font-semibold leading-[26px] md:leading-[33.6px] text-center">
-            {isLoading ? 'Memproses...' : 'Deteksi Risiko PTM'}
+            {isLoading ? "Memproses..." : "Deteksi Risiko PTM"}
           </span>
         </button>
 

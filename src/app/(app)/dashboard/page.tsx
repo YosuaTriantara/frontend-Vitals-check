@@ -1,70 +1,83 @@
-'use client';
+"use client";
 
-import Image from 'next/image';
-import Link from 'next/link';
-import { useAuth } from '@/context/AuthContext';
-import Alert from '@/components/ui/Alert';
-import HealthTrendChart from '@/components/dashboard/HealthTrendChart';
-import LastScreeningCard from '@/components/dashboard/LastScreeningCard';
-import QuickStats from '@/components/dashboard/QuickStats';
-import { useScreeningList } from '@/hooks/useScreening';
-import {
-  getBMICategory,
-  getBPCategory,
-  getGlucoseStatus,
-  healthScoreFromRisk,
-} from '@/utils/calculations';
-import { formatDate, formatRiskCategory } from '@/utils/formatters';
-import type { Screening } from '@/types/screening';
+import Image from "next/image";
+import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
+import Alert from "@/components/ui/Alert";
+import HealthTrendChart from "@/components/dashboard/HealthTrendChart";
+import LastScreeningCard from "@/components/dashboard/LastScreeningCard";
+import QuickStats from "@/components/dashboard/QuickStats";
+import { useScreeningList } from "@/hooks/useScreening";
+import { getRiskBadge, healthScoreFromRisk } from "@/utils/calculations";
+import { formatDate, formatRiskCategory } from "@/utils/formatters";
+import type { Screening } from "@/types/screening";
 
 function getLatestScreening(screenings: Screening[]) {
   return [...screenings].sort(
     (a, b) =>
-      new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime(),
+      new Date(b.createdAt ?? 0).getTime() -
+      new Date(a.createdAt ?? 0).getTime(),
   );
 }
 
 function getDisplayDate(date?: string) {
-  return date ? formatDate(date) : 'Tanggal tidak tersedia';
+  return date ? formatDate(date) : "Tanggal tidak tersedia";
 }
 
 function buildRecommendations(screening: Screening | null) {
   if (!screening) {
     return [
-      'Mulai skrining pertama untuk mendapatkan rekomendasi kesehatan personal.',
-      'Catat tekanan darah, BMI, dan gula darah Anda secara berkala.',
-      'Jaga pola makan dan aktivitas fisik minimal 30 menit per hari.',
+      "Mulai skrining pertama untuk mendapatkan rekomendasi kesehatan personal.",
+      "Pantau BMI, kondisi kesehatan umum, dan aktivitas fisik Anda secara berkala.",
+      "Jaga pola makan dan aktivitas fisik minimal 30 menit per hari.",
     ];
   }
 
   const items: string[] = [];
 
-  if (screening.bloodGlucose != null && screening.bloodGlucose > 100) {
-    items.push('Batasi minuman manis dan evaluasi kadar gula darah secara rutin.');
+  // Rekomendasi berdasarkan prediksi penyakit risiko tinggi
+  const highRiskDiseases = screening.predictions
+    ? Object.entries(screening.predictions)
+        .filter(([, p]) => p.predicted_risk === "Tinggi")
+        .map(([name]) => name)
+    : [];
+
+  if (highRiskDiseases.length > 0) {
+    items.push(
+      `Risiko tinggi terdeteksi pada ${highRiskDiseases.join(", ")} — konsultasikan dengan tenaga kesehatan.`,
+    );
   }
 
   if (screening.bmi != null && screening.bmi >= 25) {
-    items.push('Fokus pada penurunan berat badan bertahap melalui pola makan seimbang.');
+    items.push(
+      "Fokus pada penurunan berat badan bertahap melalui pola makan seimbang.",
+    );
   }
 
-  if (screening.systolicBp != null && screening.diastolicBp != null) {
-    const bp = getBPCategory(screening.systolicBp, screening.diastolicBp);
-    if (bp.label !== 'Normal') {
-      items.push('Kurangi asupan garam dan pantau tekanan darah setidaknya mingguan.');
-    }
+  if (screening.physActivity === false) {
+    items.push(
+      "Tingkatkan aktivitas fisik — targetkan minimal 30 menit olahraga setiap hari.",
+    );
   }
 
-  items.push('Lakukan olahraga ringan 30 menit setiap hari untuk menjaga tren kesehatan.');
-  items.push('Ulangi skrining berkala agar dashboard menampilkan tren yang lebih akurat.');
+  items.push(
+    "Lakukan olahraga ringan 30 menit setiap hari untuk menjaga tren kesehatan.",
+  );
+  items.push(
+    "Ulangi skrining berkala agar dashboard menampilkan tren yang lebih akurat.",
+  );
 
   return items.slice(0, 3);
 }
 
 function buildWeeklyData(screenings: Screening[]) {
-  return screenings.slice(0, 7).reverse().map((screening, index) => ({
-    label: `S${index + 1}`,
-    value: healthScoreFromRisk(screening.riskScore),
-  }));
+  return screenings
+    .slice(0, 7)
+    .reverse()
+    .map((screening, index) => ({
+      label: `S${index + 1}`,
+      value: healthScoreFromRisk(screening.riskScore),
+    }));
 }
 
 function buildMonthlyData(screenings: Screening[]) {
@@ -86,10 +99,10 @@ function buildMonthlyData(screenings: Screening[]) {
     .sort(([a], [b]) => a.localeCompare(b))
     .slice(-7)
     .map(([key, value]) => {
-      const [year, month] = key.split('-').map(Number);
+      const [year, month] = key.split("-").map(Number);
       const date = new Date(year, month, 1);
       return {
-        label: date.toLocaleDateString('id-ID', { month: 'short' }),
+        label: date.toLocaleDateString("id-ID", { month: "short" }),
         value: Math.round(value.total / value.count),
       };
     });
@@ -99,32 +112,34 @@ function HealthScoreCard({
   score,
   delta,
   riskLabel,
+  riskCategory,
   hasData,
   isLoading,
 }: {
   score: number | null;
   delta: number | null;
   riskLabel: string;
+  riskCategory: "low" | "medium" | "high" | null;
   hasData: boolean;
   isLoading: boolean;
 }) {
-  const trendText =
-    !hasData
-      ? 'Belum ada data skrining yang bisa dianalisis'
-      : delta == null
-      ? 'Belum cukup data untuk membandingkan tren'
+  const riskBadge = riskCategory ? getRiskBadge(riskCategory) : null;
+  const trendText = !hasData
+    ? "Belum ada data skrining yang bisa dianalisis"
+    : delta == null
+      ? "Belum cukup data untuk membandingkan tren"
       : delta > 0
         ? `Meningkat ${delta}% dari skrining sebelumnya`
         : delta < 0
           ? `Turun ${Math.abs(delta)}% dari skrining sebelumnya`
-          : 'Stabil dibanding skrining sebelumnya';
+          : "Stabil dibanding skrining sebelumnya";
 
   return (
     <div
       className="bg-white rounded-[20px] p-8 flex flex-col justify-between"
       style={{
-        border: '1px solid rgba(13, 99, 27, 0.05)',
-        boxShadow: '0px 4px 20px 0px rgba(13, 99, 27, 0.05)',
+        border: "1px solid rgba(13, 99, 27, 0.05)",
+        boxShadow: "0px 4px 20px 0px rgba(13, 99, 27, 0.05)",
       }}
     >
       <div className="flex items-center justify-between pb-6">
@@ -143,16 +158,22 @@ function HealthScoreCard({
         <div className="flex items-baseline gap-2">
           <span
             className="text-[48px] font-extrabold leading-[57.6px] text-[#0D631B]"
-            style={{ letterSpacing: '-2%' }}
+            style={{ letterSpacing: "-2%" }}
           >
-            {isLoading ? '...' : score ?? '—'}
+            {isLoading ? "..." : (score ?? "—")}
           </span>
           <span className="text-[18px] font-normal text-[#40493D] leading-[28.8px]">
             /100
           </span>
         </div>
-        <p className="mt-2 text-[16px] font-normal leading-[25.6px] text-[#40493D]">
-          Risiko saat ini: {riskLabel}
+        <p className="mt-2 text-[16px] font-normal leading-[25.6px]">
+          <span className="text-[#40493D]">Risiko saat ini: </span>
+          <span
+            className="font-semibold"
+            style={{ color: riskBadge?.text ?? "#40493D" }}
+          >
+            {riskLabel}
+          </span>
         </p>
       </div>
 
@@ -182,9 +203,9 @@ function RecommendationsCard({
     <div
       className="rounded-[20px] p-8 flex flex-col gap-4"
       style={{
-        border: '1px solid rgba(18, 109, 39, 0.1)',
-        boxShadow: '0px 4px 20px 0px rgba(13, 99, 27, 0.05)',
-        paddingBottom: '45.81px',
+        border: "1px solid rgba(18, 109, 39, 0.1)",
+        boxShadow: "0px 4px 20px 0px rgba(13, 99, 27, 0.05)",
+        paddingBottom: "45.81px",
       }}
     >
       <div className="flex items-center gap-3">
@@ -224,23 +245,13 @@ export default function DashboardPage() {
 
   const hasData = ordered.length > 0;
   const healthScore = latest ? healthScoreFromRisk(latest.riskScore) : null;
-  const previousScore = previous ? healthScoreFromRisk(previous.riskScore) : null;
+  const previousScore = previous
+    ? healthScoreFromRisk(previous.riskScore)
+    : null;
   const scoreDelta =
-    previousScore == null || healthScore == null ? null : healthScore - previousScore;
-
-  const lastStatus = latest
-    ? [
-        latest.bmi != null ? getBMICategory(latest.bmi).label : null,
-        latest.systolicBp != null && latest.diastolicBp != null
-          ? getBPCategory(latest.systolicBp, latest.diastolicBp).label
-          : null,
-        latest.bloodGlucose != null
-          ? getGlucoseStatus(latest.bloodGlucose).label
-          : null,
-      ]
-        .filter(Boolean)
-        .join(' • ')
-    : 'Belum ada hasil skrining tersimpan';
+    previousScore == null || healthScore == null
+      ? null
+      : healthScore - previousScore;
 
   const weeklyData = ordered.length > 0 ? buildWeeklyData(ordered) : [];
   const monthlyData = ordered.length > 0 ? buildMonthlyData(ordered) : [];
@@ -250,7 +261,8 @@ export default function DashboardPage() {
     <div className="px-4 py-6 md:px-6 lg:px-9 lg:py-8 flex flex-col gap-5 lg:gap-6 overflow-x-hidden">
       {error && (
         <Alert variant="warning">
-          Gagal memuat data dashboard dari API. Tidak ada data yang ditampilkan sampai API tersedia.
+          Gagal memuat data dashboard dari API. Tidak ada data yang ditampilkan
+          sampai API tersedia.
         </Alert>
       )}
 
@@ -258,15 +270,15 @@ export default function DashboardPage() {
         <div className="max-w-[576px] min-w-0">
           <h1
             className="text-[26px] md:text-[32px] font-bold leading-[34px] md:leading-[41.6px] text-[#0F6D2B] break-words"
-            style={{ letterSpacing: '-0.32px', fontFamily: 'var(--font-body)' }}
+            style={{ letterSpacing: "-0.32px", fontFamily: "var(--font-body)" }}
           >
-            Selamat Datang, {user?.name ?? 'User'}
+            Selamat Datang, {user?.name ?? "User"}
           </h1>
 
           <p className="mt-3 text-[15px] md:text-[18px] font-normal leading-[24px] md:leading-[28.8px] text-[#40493D] break-words">
             {latest
               ? `Skrining terakhir Anda tercatat pada ${getDisplayDate(latest.createdAt)}. Pantau perubahan skor kesehatan dan lanjutkan skrining rutin.`
-              : 'Belum ada data skrining dari API. Mulai skrining pertama Anda untuk mengisi dashboard secara otomatis.'}
+              : "Belum ada data skrining dari API. Mulai skrining pertama Anda untuk mengisi dashboard secara otomatis."}
           </p>
         </div>
 
@@ -282,7 +294,7 @@ export default function DashboardPage() {
             className="shrink-0"
           />
           <span className="break-words text-center">
-            {loading ? 'Memuat Data Skrining...' : 'Mulai Skrining Risiko'}
+            {loading ? "Memuat Data Skrining..." : "Mulai Skrining Risiko"}
           </span>
         </Link>
       </section>
@@ -292,7 +304,12 @@ export default function DashboardPage() {
           <HealthScoreCard
             score={healthScore}
             delta={scoreDelta}
-            riskLabel={latest ? formatRiskCategory(latest.riskCategory) : 'Belum tersedia'}
+            riskLabel={
+              latest
+                ? formatRiskCategory(latest.riskCategory)
+                : "Belum tersedia"
+            }
+            riskCategory={latest?.riskCategory ?? null}
             hasData={hasData}
             isLoading={loading}
           />
@@ -300,29 +317,21 @@ export default function DashboardPage() {
 
         <div className="min-w-0">
           <LastScreeningCard
-            date={latest ? getDisplayDate(latest.createdAt) : 'Belum ada data'}
-            status={lastStatus}
-            detailHref={latest?.id ? `/results/${latest.id}` : '/health-data'}
+            date={latest ? getDisplayDate(latest.createdAt) : "Belum ada data"}
+            detailHref={latest?.id ? `/results/${latest.id}` : "/health-data"}
             hasData={hasData}
           />
         </div>
-        
+
         <div className="min-w-0">
           <QuickStats
-            bloodPressure={
-              latest?.systolicBp != null && latest?.diastolicBp != null
-                ? {
-                    systolic: latest.systolicBp,
-                    diastolic: latest.diastolicBp,
-                  }
-                : null
-            }
+            genHlth={latest?.genHlth ?? null}
             bmi={latest?.bmi ?? null}
             totalScreenings={ordered.length}
             hasData={hasData}
           />
         </div>
-        
+
         <div className="min-w-0">
           <RecommendationsCard recommendations={recommendations} />
         </div>
@@ -334,8 +343,6 @@ export default function DashboardPage() {
             isLoading={loading}
           />
         </div>
-
-        
       </section>
     </div>
   );

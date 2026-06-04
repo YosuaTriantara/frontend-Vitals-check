@@ -1,4 +1,4 @@
-import type { RiskCategory } from '@/types/screening';
+import type { RiskCategory, Predictions } from "@/types/screening";
 
 interface RecommendationItem {
   title: string;
@@ -32,73 +32,78 @@ function buildRecommendations({
   riskCategory,
   riskScore,
   bmi,
-  systolicBp,
-  diastolicBp,
-  bloodGlucose,
+  predictions,
 }: {
   riskCategory: RiskCategory;
   riskScore: number;
   bmi?: number | null;
-  systolicBp?: number | null;
-  diastolicBp?: number | null;
-  bloodGlucose?: number | null;
+  predictions?: Predictions | null;
 }): RecommendationItem[] {
-  const highRisk = riskCategory === 'high' || riskScore >= 0.7;
-  const mediumRisk = riskCategory === 'medium' || riskScore >= 0.4;
+  const highRisk = riskCategory === "high" || riskScore >= 0.7;
+  const mediumRisk = riskCategory === "medium" || riskScore >= 0.4;
   const highBmi = bmi != null && bmi >= 25;
-  const elevatedBp =
-    systolicBp != null &&
-    diastolicBp != null &&
-    (systolicBp >= 130 || diastolicBp >= 80);
-  const elevatedGlucose = bloodGlucose != null && bloodGlucose > 100;
+
+  const highDiabetes = predictions?.["Diabetes"]?.predicted_risk === "Tinggi";
+  const highHipertensi =
+    predictions?.["Hipertensi"]?.predicted_risk === "Tinggi";
+  const highKolesterol =
+    predictions?.["Kolesterol Tinggi"]?.predicted_risk === "Tinggi";
+  const highJantung =
+    predictions?.["Penyakit Jantung"]?.predicted_risk === "Tinggi";
 
   return [
     {
-      title: 'Diet & Nutrisi',
-      badge: highRisk ? 'Prioritas Tinggi' : mediumRisk ? 'Prioritas' : 'Pemeliharaan',
-      badgeBg: highRisk ? '#BC1120' : '#9CF49C',
-      badgeText: highRisk ? '#F6FBF1' : '#126D27',
-      iconBg: 'white',
+      title: "Diet & Nutrisi",
+      badge: highRisk
+        ? "Prioritas Tinggi"
+        : mediumRisk
+          ? "Prioritas"
+          : "Pemeliharaan",
+      badgeBg: highRisk ? "#BC1120" : "#9CF49C",
+      badgeText: highRisk ? "#F6FBF1" : "#126D27",
+      iconBg: "white",
       icon: <ForkIcon />,
       items: [
-        elevatedGlucose
-          ? 'Batasi minuman manis dan pilih karbohidrat kompleks setiap hari.'
-          : 'Pertahankan pola makan seimbang dengan serat dan protein cukup.',
+        highDiabetes
+          ? "Batasi minuman manis dan pilih karbohidrat kompleks setiap hari."
+          : highKolesterol
+            ? "Kurangi lemak jenuh dan perbanyak konsumsi serat larut setiap hari."
+            : "Pertahankan pola makan seimbang dengan serat dan protein cukup.",
         highBmi
-          ? 'Atur defisit kalori ringan dan prioritaskan porsi makan terukur.'
-          : 'Jaga jadwal makan teratur untuk menjaga kestabilan metabolik.',
+          ? "Atur defisit kalori ringan dan prioritaskan porsi makan terukur."
+          : "Jaga jadwal makan teratur untuk menjaga kestabilan metabolik.",
       ],
     },
     {
-      title: 'Aktivitas Fisik',
-      badge: highRisk ? 'Harian' : 'Rutin',
-      badgeBg: '#9CF49C',
-      badgeText: '#126D27',
-      iconBg: 'white',
+      title: "Aktivitas Fisik",
+      badge: highRisk ? "Harian" : "Rutin",
+      badgeBg: "#9CF49C",
+      badgeText: "#126D27",
+      iconBg: "white",
       icon: <RunIcon />,
       items: [
         highRisk || highBmi
-          ? 'Lakukan jalan cepat 30 menit minimal 5 kali per minggu.'
-          : 'Lanjutkan aktivitas aerobik ringan untuk menjaga stamina harian.',
-        elevatedBp
-          ? 'Tambahkan latihan peregangan dan pernapasan untuk bantu kontrol tekanan darah.'
-          : 'Sisihkan latihan kekuatan ringan 2 kali per minggu.',
+          ? "Lakukan jalan cepat 30 menit minimal 5 kali per minggu."
+          : "Lanjutkan aktivitas aerobik ringan untuk menjaga stamina harian.",
+        highHipertensi || highJantung
+          ? "Tambahkan latihan peregangan dan pernapasan untuk bantu kontrol tekanan darah."
+          : "Sisihkan latihan kekuatan ringan 2 kali per minggu.",
       ],
     },
     {
-      title: 'Pemantauan Rutin',
-      badge: elevatedBp || elevatedGlucose ? 'Monitoring' : 'Observasi',
-      badgeBg: '#F0F5EB',
-      badgeText: '#40493D',
-      iconBg: 'white',
+      title: "Pemantauan Rutin",
+      badge: highHipertensi || highDiabetes ? "Monitoring" : "Observasi",
+      badgeBg: "#F0F5EB",
+      badgeText: "#40493D",
+      iconBg: "white",
       icon: <EyeIcon />,
       items: [
-        elevatedBp
-          ? 'Catat tekanan darah pagi dan malam selama 7 hari ke depan.'
-          : 'Ulangi skrining berkala untuk melihat perubahan tren risiko.',
-        elevatedGlucose
-          ? 'Pantau kadar gula darah dan konsultasikan bila hasil tetap meningkat.'
-          : 'Simpan hasil skrining berikutnya agar analisis tren makin akurat.',
+        highHipertensi
+          ? "Catat tekanan darah pagi dan malam selama 7 hari ke depan."
+          : "Ulangi skrining berkala untuk melihat perubahan tren risiko.",
+        highDiabetes
+          ? "Pantau kadar gula darah dan konsultasikan bila hasil tetap meningkat."
+          : "Simpan hasil skrining berikutnya agar analisis tren makin akurat.",
       ],
     },
   ];
@@ -108,14 +113,14 @@ function RecommendationCard({ rec }: { rec: RecommendationItem }) {
   return (
     <div
       className="bg-[#F6FBF1] rounded-[20px] p-5 md:p-6 flex flex-col gap-2 min-w-0 overflow-hidden"
-      style={{ border: '1px solid #FFFFFF' }}
+      style={{ border: "1px solid #FFFFFF" }}
     >
       <div className="flex items-start justify-between gap-3 mb-2 min-w-0">
         <div
           className="w-11 h-11 md:w-12 md:h-12 rounded-[12px] flex items-center justify-center shrink-0"
           style={{
             background: rec.iconBg,
-            border: '1px solid #BFCABA',
+            border: "1px solid #BFCABA",
           }}
         >
           {rec.icon}
@@ -126,7 +131,7 @@ function RecommendationCard({ rec }: { rec: RecommendationItem }) {
           style={{
             background: rec.badgeBg,
             color: rec.badgeText,
-            paddingBottom: '4.39px',
+            paddingBottom: "4.39px",
           }}
         >
           {rec.badge}
@@ -135,7 +140,7 @@ function RecommendationCard({ rec }: { rec: RecommendationItem }) {
 
       <p
         className="text-[14px] font-bold leading-[16.8px] break-words"
-        style={{ letterSpacing: '0.14px', color: '#0F6D2B' }}
+        style={{ letterSpacing: "0.14px", color: "#0F6D2B" }}
       >
         {rec.title}
       </p>
@@ -158,9 +163,7 @@ interface RecommendationsPanelProps {
   riskCategory: RiskCategory;
   riskScore: number;
   bmi?: number | null;
-  systolicBp?: number | null;
-  diastolicBp?: number | null;
-  bloodGlucose?: number | null;
+  predictions?: Predictions | null;
 }
 
 export default function RecommendationsPanel(props: RecommendationsPanelProps) {
@@ -169,12 +172,12 @@ export default function RecommendationsPanel(props: RecommendationsPanelProps) {
   return (
     <div
       className="bg-white rounded-[24px] p-5 md:p-6 xl:p-8 flex flex-col gap-6 xl:gap-8 border-l-[6px] xl:border-l-[8px] border-l-[#0D631B] min-w-0 overflow-hidden"
-      style={{ boxShadow: '0px 4px 20px -2px rgba(13,99,27,0.08)' }}
+      style={{ boxShadow: "0px 4px 20px -2px rgba(13,99,27,0.08)" }}
     >
       <div className="flex items-start gap-4 min-w-0">
         <div
           className="w-11 h-11 md:w-12 md:h-12 rounded-[16px] flex items-center justify-center shrink-0"
-          style={{ background: '#9CF49C' }}
+          style={{ background: "#9CF49C" }}
         >
           <svg width="15" height="20" viewBox="0 0 24 24" fill="#0D631B">
             <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />

@@ -1,4 +1,4 @@
-import type { RiskCategory } from '@/types/screening';
+import type { RiskCategory } from "@/types/screening";
 
 export function calculateBMI(heightCm: number, weightKg: number): number {
   if (heightCm <= 0) return 0;
@@ -6,30 +6,53 @@ export function calculateBMI(heightCm: number, weightKg: number): number {
 }
 
 export function getBMICategory(bmi: number): { label: string; color: string } {
-  if (bmi < 18.5) return { label: 'Kurang',    color: '#854D0E' };
-  if (bmi < 25)   return { label: 'Normal',    color: '#0D631B' };
-  if (bmi < 30)   return { label: 'Kelebihan', color: '#B45309' };
-  return              { label: 'Obesitas',  color: '#BA1A1A' };
+  if (bmi < 18.5) return { label: "Kurang", color: "#854D0E" };
+  if (bmi < 25) return { label: "Normal", color: "#0D631B" };
+  if (bmi < 30) return { label: "Kelebihan", color: "#B45309" };
+  return { label: "Obesitas", color: "#BA1A1A" };
 }
 
-export function getBPCategory(systolic: number, diastolic: number): {
+export function getBPCategory(
+  systolic: number,
+  diastolic: number,
+): {
   label: string;
   color: string;
 } {
   if (systolic < 120 && diastolic < 80)
-    return { label: 'Normal',        color: '#0D631B' };
+    return { label: "Normal", color: "#0D631B" };
   if (systolic < 130 && diastolic < 80)
-    return { label: 'Meningkat',     color: '#B45309' };
+    return { label: "Meningkat", color: "#B45309" };
   if (systolic < 140 || diastolic < 90)
-    return { label: 'Hipertensi 1',  color: '#EA580C' };
-  return   { label: 'Hipertensi 2',  color: '#BA1A1A' };
+    return { label: "Hipertensi 1", color: "#EA580C" };
+  return { label: "Hipertensi 2", color: "#BA1A1A" };
+}
+
+export function getGenHlthCategory(genHlth: number): {
+  label: string;
+  color: string;
+} {
+  switch (genHlth) {
+    case 1:
+      return { label: "Buruk", color: "#BA1A1A" };
+    case 2:
+      return { label: "Cukup", color: "#B45309" };
+    case 3:
+      return { label: "Baik", color: "#0D631B" };
+    case 4:
+      return { label: "Sangat Baik", color: "#0D631B" };
+    case 5:
+      return { label: "Luar Biasa", color: "#0D631B" };
+    default:
+      return { label: "Tidak Diketahui", color: "#40493D" };
+  }
 }
 
 export function getGlucoseStatus(mg: number): { label: string; color: string } {
-  if (mg < 70)  return { label: 'Rendah', color: '#B45309' };
-  if (mg <= 100) return { label: 'OK',     color: '#0D631B' };
-  if (mg <= 125) return { label: 'Pra-DM', color: '#EA580C' };
-  return             { label: 'Tinggi',  color: '#BA1A1A' };
+  if (mg < 70) return { label: "Rendah", color: "#B45309" };
+  if (mg <= 100) return { label: "OK", color: "#0D631B" };
+  if (mg <= 125) return { label: "Pra-DM", color: "#EA580C" };
+  return { label: "Tinggi", color: "#BA1A1A" };
 }
 
 export function getRiskBadge(category: RiskCategory): {
@@ -38,12 +61,12 @@ export function getRiskBadge(category: RiskCategory): {
   text: string;
 } {
   switch (category) {
-    case 'low':
-      return { label: 'Rendah',  bg: 'rgba(156,244,156,0.3)', text: '#126D27' };
-    case 'medium':
-      return { label: 'Moderat', bg: 'rgba(156,244,156,0.3)', text: '#126D27' };
-    case 'high':
-      return { label: 'Tinggi',  bg: 'rgba(255,218,214,0.3)', text: '#BA1A1A' };
+    case "low":
+      return { label: "Rendah", bg: "rgba(156,244,156,0.3)", text: "#126D27" };
+    case "medium":
+      return { label: "Moderat", bg: "rgba(156,244,156,0.3)", text: "#126D27" };
+    case "high":
+      return { label: "Tinggi", bg: "rgba(255,218,214,0.3)", text: "#BA1A1A" };
   }
 }
 
@@ -54,14 +77,14 @@ export function healthScoreFromRisk(riskScore: number): number {
 export function calculateTrend(scores: number[]): number {
   if (scores.length < 2) return 0;
   return parseFloat(
-    (((scores[scores.length - 1] - scores[0]) / scores[0]) * 100).toFixed(1)
+    (((scores[scores.length - 1] - scores[0]) / scores[0]) * 100).toFixed(1),
   );
 }
 
 export function deriveRiskFactors(
   riskScore: number,
   bmi: number | null,
-  systolicBp: number | null
+  systolicBp: number | null,
 ): { cardiovascular: number; metabolic: number; lifestyle: number } {
   const base = riskScore * 100;
   const cardiovascular = systolicBp
