@@ -81,18 +81,3 @@ export function calculateTrend(scores: number[]): number {
   );
 }
 
-export function deriveRiskFactors(
-  riskScore: number,
-  bmi: number | null,
-  systolicBp: number | null,
-): { cardiovascular: number; metabolic: number; lifestyle: number } {
-  const base = riskScore * 100;
-  const cardiovascular = systolicBp
-    ? Math.min(100, Math.round(Math.max(0, (systolicBp - 100) / 1.4)))
-    : Math.min(100, Math.round(base * 1.1));
-  const metabolic = bmi
-    ? Math.min(100, Math.round(Math.max(0, ((bmi - 18.5) / 21.5) * 100)))
-    : Math.min(100, Math.round(base * 0.7));
-  const lifestyle = Math.min(100, Math.round(base * 1.25));
-  return { cardiovascular, metabolic, lifestyle };
-}

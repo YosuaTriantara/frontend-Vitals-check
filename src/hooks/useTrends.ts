@@ -31,13 +31,5 @@ export function useTrends(screenings: Screening[]) {
     [sorted],
   );
 
-  const bpTrend = useMemo(
-    () =>
-      sorted
-        .filter((s) => s.systolicBp != null)
-        .map((s) => ({ date: s.createdAt ?? '', value: s.systolicBp! })),
-    [sorted],
-  );
-
-  return { riskScoreTrend, bmiTrend, bpTrend };
+  return { riskScoreTrend, bmiTrend };
 }
