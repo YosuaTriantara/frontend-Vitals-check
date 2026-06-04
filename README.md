@@ -91,7 +91,6 @@ frontend/
 └── README.md                    # (This file)
 ```
 
-Lihat [src/STRUCTURE.md](./src/STRUCTURE.md) untuk dokumentasi detail setiap folder.
 
 ---
 
@@ -320,37 +319,3 @@ npm run build
 - [Tailwind CSS](https://tailwindcss.com/docs)
 - [Zod Validation](https://zod.dev/)
 
----
-
-## 🤝 Contributing
-
-1. Create feature branch: `git checkout -b feature/xyz`
-2. Make changes & test locally
-3. Commit: `git commit -m "Add xyz feature"`
-4. Push: `git push origin feature/xyz`
-5. Create Pull Request
-
----
-
-## 📝 Environment Variables
-
-### Development
-```env
-NEXT_PUBLIC_API_URL=http://localhost:5000/api
-```
-
-### Production (Vercel/Netlify)
-```env
-NEXT_PUBLIC_API_URL=https://your-backend-api.com/api
-```
-
----
-
-## 📞 Support
-
-Lihat [src/STRUCTURE.md](./src/STRUCTURE.md) untuk documentasi detail atau buat issue di GitHub.
-
----
-
-**Last Updated**: May 21, 2026  
-**Maintained by**: CC26-PSU319 TeamV
